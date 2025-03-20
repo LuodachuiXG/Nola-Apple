@@ -12,18 +12,16 @@ struct ContentView: View {
     var body: some View {
         TabView {
             Tab("概览", systemImage: "waveform.path.ecg.rectangle") {
-                Text("概览")
-                    .font(.title)
+                OverviewView()
             }
+        
             
             Tab("模块", systemImage: "xmark.triangle.circle.square") {
-                Text("功能")
-                    .font(.title)
+                ModuleView()
             }
             
             Tab("用户", systemImage: "person") {
-                Text("用户")
-                    .font(.title)
+                UserView()
             }
         }
     }

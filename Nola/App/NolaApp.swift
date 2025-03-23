@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct NolaApp: App {
+    
+    @StateObject private var authManager = AuthManager.shared
+    
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(authManager)
         }
     }
 }

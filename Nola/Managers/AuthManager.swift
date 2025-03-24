@@ -20,11 +20,20 @@ class AuthManager: ObservableObject {
         checkLoginStatus()
     }
     
+    /// 判断当前是否已经登录
     func checkLoginStatus() {
-        isLoggedIn = UserDefaults.standard.object(forKey: userKey) != nil
+        let userData = UserDefaults.standard.data(forKey: userKey)
+        isLoggedIn = userData != nil
+        if let data = userData {
+            let decoder = JSONDecoder()
+            currentUser = try? decoder.decode(User.self, from: data)
+        }
     }
     
-    func saveUser(_ user: User) {
+    /// 登录成功，保存登录信息
+    /// - Parameters:
+    ///   - user: 用户
+    func loginSuccess(_ user: User) {
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(user)
@@ -36,15 +45,10 @@ class AuthManager: ObservableObject {
         }
     }
     
+    /// 登出
     func logout() {
         UserDefaults.standard.removeObject(forKey: userKey)
         currentUser = nil
         isLoggedIn = false
-    }
-    
-    enum UserDefaultsError: Error {
-        case saveFailed(String)
-        case userNotFound
-        case decodeFailed(String)
     }
 }

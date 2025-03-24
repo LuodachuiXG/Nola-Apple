@@ -31,32 +31,29 @@ class NetworkManager {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if let parameters = parameters {
-            print(parameters)
             request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
         }
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { data, response in
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    throw ApiError(message: "Invalid response.")
+                    throw ApiError(message: "非法响应")
                 }
                 
-                print(httpResponse.statusCode)
-                
                 guard let httpStatus = ApiResponse<T>.StatusCode(rawValue: httpResponse.statusCode) else {
-                    throw ApiError(message: "Unknown http status code.")
+                    throw ApiError(message: "未知 HTTP 状态码")
                 }
                 
                 switch httpStatus {
                 case .conflict:
                     let apiResponse = try JSONDecoder().decode(ApiResponse<T>.self, from: data)
-                    throw ApiError(message: apiResponse.errMsg ?? "Unknown reponse error.")
+                    throw ApiError(message: apiResponse.errMsg ?? "未知错误")
                 case .unauthorized:
-                    throw ApiError(message: "Login has expired.")
+                    throw ApiError(message: "登录已过期")
                 case .tooManyRequests:
-                    throw ApiError(message: "Request too frequently.")
+                    throw ApiError(message: "请求太频繁")
                 case .internalServerError:
-                    throw ApiError(message: "Server Error.")
+                    throw ApiError(message: "服务器错误")
                 case .ok:
                     return data
                 }

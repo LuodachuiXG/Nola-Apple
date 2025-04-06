@@ -17,13 +17,13 @@ struct AdminService {
     static func login(
         username: String,
         password: String
-    ) -> AnyPublisher<ApiResponse<User>, ApiError> {
+    ) async throws -> ApiResponse<User> {
         let parameters = [
             "username": username,
             "password": password
         ]
         
-        return NetworkManager.shared.request(
+        return try await NetworkManager.shared.request(
             endpoint: "/admin/user/login",
             method: .post,
             parameters: parameters

@@ -26,7 +26,7 @@ struct ModuleView: View {
         NavigationSplitView {
             ScrollView {
                 // 每行两列的网格布局
-                LazyVGrid(columns: columns, spacing: 20) {
+                LazyVGrid(columns: columns, spacing: .defaultSpacing) {
                     ForEach(buttons) { button in
                         NavigationLink {
                             button.destination
@@ -38,7 +38,7 @@ struct ModuleView: View {
                 }
                 .padding()
                 .navigationTitle("模块")
-            }.background(Color(.systemGroupedBackground))
+            }
         } detail: {
             Text("选择一个模块")
         }

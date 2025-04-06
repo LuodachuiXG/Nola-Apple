@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		CB1837392D919F9100C7318E /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = CB1837382D919F9100C7318E /* PopupView */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		CB3B65D32D887413003B3751 /* Nola.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nola.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -27,7 +23,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CB1837392D919F9100C7318E /* PopupView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +65,6 @@
 			);
 			name = Nola;
 			packageProductDependencies = (
-				CB1837382D919F9100C7318E /* PopupView */,
 			);
 			productName = Nola;
 			productReference = CB3B65D32D887413003B3751 /* Nola.app */;
@@ -101,7 +95,6 @@
 			mainGroup = CB3B65CA2D887413003B3751;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				CB1837372D919F9100C7318E /* XCRemoteSwiftPackageReference "PopupView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB3B65D42D887413003B3751 /* Products */;
@@ -348,25 +341,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		CB1837372D919F9100C7318E /* XCRemoteSwiftPackageReference "PopupView" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/exyte/PopupView";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.1.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		CB1837382D919F9100C7318E /* PopupView */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CB1837372D919F9100C7318E /* XCRemoteSwiftPackageReference "PopupView" */;
-			productName = PopupView;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CB3B65CB2D887413003B3751 /* Project object */;
 }

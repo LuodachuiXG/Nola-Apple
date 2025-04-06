@@ -12,7 +12,8 @@ struct ModuleButton: View {
     var button: ModuleNav
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
+        
+        Card(alignment: .leading, spacing: .defaultSpacing) {
             
             HStack() {
                 Image(systemName: button.icon)
@@ -27,6 +28,7 @@ struct ModuleButton: View {
                     .foregroundStyle(Color(.label))
             }
             .padding(.horizontal)
+            .padding(.top)
             
             
             HStack {
@@ -36,12 +38,12 @@ struct ModuleButton: View {
                     .foregroundStyle(.secondary)
             }
             .padding(.horizontal)
+            .padding(.bottom)
             .foregroundStyle(Color(.label))
             
         }
         .frame(maxWidth: .infinity, minHeight: 100)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
         .padding(.horizontal, 5)
     }
 }

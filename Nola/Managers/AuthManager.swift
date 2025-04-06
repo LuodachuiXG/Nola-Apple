@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 class AuthManager: ObservableObject {
     static let shared = AuthManager()
     
@@ -21,7 +20,7 @@ class AuthManager: ObservableObject {
     }
     
     /// 判断当前是否已经登录
-    func checkLoginStatus() {
+    private func checkLoginStatus() {
         let userData = UserDefaults.standard.data(forKey: userKey)
         isLoggedIn = userData != nil
         if let data = userData {
@@ -33,7 +32,7 @@ class AuthManager: ObservableObject {
     /// 登录成功，保存登录信息
     /// - Parameters:
     ///   - user: 用户
-    func loginSuccess(_ user: User) {
+    func login(_ user: User) {
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(user)

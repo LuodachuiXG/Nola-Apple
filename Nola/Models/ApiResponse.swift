@@ -11,12 +11,5 @@ struct ApiResponse<T: Codable>: Codable {
     let code: StatusCode
     let errMsg: String?
     let data: T?
-    
-    enum StatusCode: Int, Codable {
-        case ok = 200
-        case conflict = 409
-        case unauthorized = 401
-        case tooManyRequests = 429
-        case internalServerError = 500
-    }
 }
+

@@ -11,7 +11,7 @@ import SwiftUI
 struct NolaApp: App {
     
     @StateObject private var authManager = AuthManager.shared
-    
+
     
     var body: some Scene {
         WindowGroup {

@@ -11,8 +11,6 @@ import SwiftUI
 @MainActor
 class UserStore: ObservableObject {
     
-    @EnvironmentObject private var auth: AuthManager
-    
     @Published var isLoading: Bool = false
     
     /// 用户登陆
@@ -24,7 +22,7 @@ class UserStore: ObservableObject {
     func login(
         username: String,
         password: String,
-        success: @escaping (String) -> Void,
+        success: @escaping (User) -> Void,
         failure: @escaping (String) -> Void = { _ in },
     ) {
         isLoading = true
@@ -34,8 +32,9 @@ class UserStore: ObservableObject {
                 let res = try await AdminService.login(username: username, password: password)
                 isLoading = false
                 // 登录成功
-                success(res.data!.displayName)
+                success(res.data!)
             } catch let error as ApiError {
+                print(error.message)
                 isLoading = false
                 failure(error.message)
             }

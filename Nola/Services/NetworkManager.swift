@@ -18,6 +18,9 @@ enum HttpMethod: String {
 
 class NetworkManager {
     static let shared = NetworkManager()
+    
+    private let timeoutInterval = 10.0
+    
     private var baseUrl: String? = nil
     
     
@@ -53,12 +56,16 @@ class NetworkManager {
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = timeoutInterval
         
         if let parameters = parameters {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
         }
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = timeoutInterval
+        let session = URLSession(configuration: config)
+        let (data, response) = try await session.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ApiError(message: "非法响应")

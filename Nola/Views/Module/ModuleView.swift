@@ -26,7 +26,7 @@ struct ModuleView: View {
         NavigationSplitView {
             ScrollView {
                 // 每行两列的网格布局
-                LazyVGrid(columns: columns, spacing: .defaultSpacing) {
+                LazyVGrid(columns: columns, spacing: 20) {
                     ForEach(buttons) { button in
                         NavigationLink {
                             button.destination

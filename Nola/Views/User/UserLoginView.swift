@@ -25,6 +25,10 @@ struct UserLoginView: View {
     // URL 错误
     @State private var showUrlError = false
     
+    // 登录错误
+    @State private var showLoginError = false
+    @State private var loginErrorStr = ""
+    
     
     private enum Field: Hashable {
         case url, username, password
@@ -70,27 +74,12 @@ struct UserLoginView: View {
                         focusedField = nil
                     }
                 
-                Button("登录") {
-                    if url.isEmpty || username.isEmpty || password.isEmpty {
-                        showInputError = true
-                        return
+                if userStore.isLoading {
+                    ProgressView()
+                } else {
+                    Button("登录") {
+                        login()
                     }
-                    
-                    if !url.isValidUrl() {
-                        // 站点地址不合法
-                        showUrlError = true
-                        return
-                    }
-                    
-                    // 先配置服务器地址
-                    NetworkManager.shared.setBaseUrl(url: url)
-                    
-                    userStore.login(username: username, password: password) { name in
-                        print(name)
-                    } failure: { err in
-                        print(err)
-                    }
-                    
                 }
             }
             .padding(.top, 20)
@@ -103,9 +92,36 @@ struct UserLoginView: View {
         .padding([.top, .leading, .trailing], 40)
         .messageAlert(isPresented: $showInputError, message: "请将内容输入完整")
         .messageAlert(isPresented: $showUrlError, message: "请输入正确的站点地址")
+        .messageAlert(isPresented: $showLoginError, message: LocalizedStringKey(loginErrorStr))
+        .loadingAlert(isPresented: $userStore.isLoading, message: "正在登录", closableAfter: .seconds(5))
+    }
+    
+    
+    private func login() {
+        if url.isEmpty || username.isEmpty || password.isEmpty {
+            showInputError = true
+            return
+        }
+        
+        if !url.isValidUrl() {
+            // 站点地址不合法
+            showUrlError = true
+            return
+        }
+        
+        // 先配置服务器地址
+        NetworkManager.shared.setBaseUrl(url: url)
+        
+        userStore.login(username: username, password: password) { name in
+            print(name)
+        } failure: { err in
+            loginErrorStr = err
+            showLoginError = true
+        }
     }
 }
 
 #Preview {
     UserLoginView()
+        .environmentObject(AuthManager.shared)
 }

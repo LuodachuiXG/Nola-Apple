@@ -39,6 +39,7 @@ struct ModuleButton: View {
             }
             .padding(.horizontal)
             .padding(.bottom)
+            .padding(.top, .defaultSpacing)
             .foregroundStyle(Color(.label))
             
         }

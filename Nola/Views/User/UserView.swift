@@ -19,7 +19,7 @@ struct UserView: View {
     
     @State private var showToast = false
     
-    @State private var showLoginSheet = false
+    @State private var showLoginSheet = true
     
     private var isLight: Bool {
         colorScheme == .light

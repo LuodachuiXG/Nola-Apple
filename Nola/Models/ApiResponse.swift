@@ -8,7 +8,7 @@
 import Foundation
 
 struct ApiResponse<T: Codable>: Codable {
-    let code: StatusCode
+    let code: ApiResponseStatusCode
     let errMsg: String?
     let data: T?
 }

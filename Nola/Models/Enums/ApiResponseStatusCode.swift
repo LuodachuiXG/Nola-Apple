@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum StatusCode: Int, Codable {
+enum ApiResponseStatusCode: Int, Codable {
     case ok = 200
     case conflict = 409
     case unauthorized = 401

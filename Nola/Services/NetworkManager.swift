@@ -71,7 +71,7 @@ class NetworkManager {
             throw ApiError(message: "非法响应")
         }
         
-        guard let statusCode = StatusCode(rawValue: httpResponse.statusCode) else {
+        guard let statusCode = ApiResponseStatusCode(rawValue: httpResponse.statusCode) else {
             throw ApiError(message: "请求错误码：\(httpResponse.statusCode)")
         }
         

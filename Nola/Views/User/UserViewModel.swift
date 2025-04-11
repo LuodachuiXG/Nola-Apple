@@ -9,11 +9,11 @@ import Foundation
 import SwiftUI
 
 @MainActor
-class UserStore: ObservableObject {
+class UserViewModel: ObservableObject {
     
     @Published var isLoading: Bool = false
     
-    /// 用户登陆
+    /// 用户登录
     /// - Parameters:
     ///   - username: 用户名
     ///   - password: 密码
@@ -37,6 +37,10 @@ class UserStore: ObservableObject {
                 print(error.message)
                 isLoading = false
                 failure(error.message)
+            } catch {
+                print(error.localizedDescription)
+                isLoading = false
+                failure(error.localizedDescription)
             }
         }
     }

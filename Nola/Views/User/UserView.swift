@@ -19,7 +19,7 @@ struct UserView: View {
     
     @State private var showToast = false
     
-    @State private var showLoginSheet = true
+    @State private var showLoginSheet = false
     
     private var isLight: Bool {
         colorScheme == .light
@@ -31,9 +31,10 @@ struct UserView: View {
                 VStack(spacing: 20) {
                     Card {
                         HStack(alignment: .top, spacing: 20) {
-                            UserAvatar()
+                            UserAvatar(user: authManager.currentUser)
                             VStack(alignment: .leading ,spacing: 4) {
                                 if !authManager.isLoggedIn {
+                                    // 未登录
                                     HStack {
                                         Image(systemName: "lock.fill")
                                         Text("未登录 Nola")
@@ -43,6 +44,9 @@ struct UserView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                     Spacer()
+                                } else {
+                                    // 已登录
+                                    UserDetail(user: authManager.currentUser!)
                                 }
                             }
                             Spacer()
@@ -50,41 +54,52 @@ struct UserView: View {
                         .padding()
                     }
                     .onTapGesture {
-                        showLoginSheet.toggle()
+                        // 如果当前未登录，显示登录页面
+                        if !authManager.isLoggedIn {
+                            showLoginSheet.toggle()
+                        } else {
+                            // 当前已登录，点击后退出登录（#### 测试代码 ####）
+                            authManager.logout()
+                            showLoginSheet.toggle()
+                        }
                     }
                     .frame(maxHeight: 110)
                     Spacer()
                 }
                 .padding()
                 .sheet(isPresented: $showLoginSheet) {
-                    UserLoginView()
+                    UserLoginView(isPresented: $showLoginSheet)
                 }
             }
         }
     }
+}
+
+private struct UserDetail: View {
     
+    var user: User
     
-    //    private func performLogin() {
-    //        isLoading = true
-    //        errorMessage = nil
-    //
-    //        AdminService.login(username: username, password: password)
-    //            .receive(on: DispatchQueue.main)
-    //            .sink { completion in
-    //                isLoading = false
-    //                switch completion {
-    //                case .finished:
-    //                    break
-    //                case .failure(let error):
-    //                    errorMessage = error.message
-    //                    showToast = true
-    //                }
-    //            } receiveValue: { res in
-    //                if let user = res.data {
-    //                    authManager.loginSuccess(user)
-    //                }
-    //            }.store(in: &cancellables)
-    //    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(user.displayName)
+                .font(.title2)
+                .fontDesign(.rounded)
+            
+            Text(user.email)
+                .foregroundStyle(.secondary)
+                .fontDesign(.serif)
+                .font(.callout)
+            
+            Spacer()
+            if let last = user.lastLoginDate {
+                Text("上次登录：" + last.formatMillisToDateStr())
+                    .foregroundStyle(.tertiary)
+                    .fontDesign(.rounded)
+                    .font(.caption)
+            }
+
+        }
+    }
 }
 
 #Preview {

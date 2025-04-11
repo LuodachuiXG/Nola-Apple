@@ -11,7 +11,9 @@ struct UserLoginView: View {
     
     @EnvironmentObject var authManager: AuthManager
     
-    @StateObject private var userStore = UserStore()
+    @StateObject private var userStore = UserViewModel()
+    
+    @Binding var isPresented: Bool
     
     @State private var url = ""
     @State private var username = ""
@@ -44,41 +46,70 @@ struct UserLoginView: View {
                 .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
             
             VStack(alignment: .trailing, spacing: 20) {
-                TextField("站点地址 https://", text: $url)
-                    .focused($focusedField, equals: .url)
-                    .textFieldStyle(.roundedBorder)
-                    .shadow(color: focusedField == .url ? .gray.opacity(0.2) : .clear, radius: 10)
-                    .animation(.spring, value: focusedField)
-                    .submitLabel(.next)
-                    .onSubmit {
-                        focusedField = .username
+                if authManager.isLoggedIn {
+                    VStack {
+                        Image(systemName: "checkmark.circle")
+                            .resizable()
+                            .frame(width: 120, height: 120)
+                            .foregroundStyle(.green)
+                            .padding()
+                        Text("登录成功")
+                            .font(.title)
                     }
-                
-                TextField("用户名", text: $username)
-                    .focused($focusedField, equals: .username)
-                    .textFieldStyle(.roundedBorder)
-                    .shadow(color: focusedField == .username ? .gray.opacity(0.2) : .clear, radius: 10)
-                    .animation(.spring, value: focusedField)
-                    .submitLabel(.next)
-                    .onSubmit {
-                        focusedField = .password
+                    .transition(.blurReplace)
+                    .padding()
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            // 关闭登录 sheet
+                            $isPresented.wrappedValue = false
+                        }
                     }
-                
-                SecureField("密码", text: $password)
-                    .focused($focusedField, equals: .password)
-                    .textFieldStyle(.roundedBorder)
-                    .shadow(color: focusedField == .password ? .gray.opacity(0.2) : .clear, radius: 10)
-                    .animation(.spring, value: focusedField)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        focusedField = nil
-                    }
-                
-                if userStore.isLoading {
-                    ProgressView()
                 } else {
-                    Button("登录") {
-                        login()
+                    TextField("站点地址 https://", text: $url)
+                        .focused($focusedField, equals: .url)
+                        .textFieldStyle(.roundedBorder)
+                        .shadow(color: focusedField == .url ? .gray.opacity(0.2) : .clear, radius: 10)
+                        .animation(.spring, value: focusedField)
+                        .submitLabel(.next)
+                        .textContentType(.URL)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .onSubmit {
+                            focusedField = .username
+                        }
+                    
+                    TextField("用户名", text: $username)
+                        .focused($focusedField, equals: .username)
+                        .textFieldStyle(.roundedBorder)
+                        .shadow(color: focusedField == .username ? .gray.opacity(0.2) : .clear, radius: 10)
+                        .animation(.spring, value: focusedField)
+                        .submitLabel(.next)
+                        .textContentType(.username)
+                        .textInputAutocapitalization(.never)
+                        .onSubmit {
+                            focusedField = .password
+                        }
+                    
+                    SecureField("密码", text: $password)
+                        .focused($focusedField, equals: .password)
+                        .textFieldStyle(.roundedBorder)
+                        .shadow(color: focusedField == .password ? .gray.opacity(0.2) : .clear, radius: 10)
+                        .animation(.spring, value: focusedField)
+                        .submitLabel(.done)
+                        .textContentType(.password)
+                        .onSubmit {
+                            focusedField = nil
+                        }
+                    
+                    if userStore.isLoading {
+                        ProgressView()
+                    } else {
+                        Button("登录") {
+                            // 改变焦点，收起键盘
+                            focusedField = nil
+                            
+                            login()
+                        }
                     }
                 }
             }
@@ -112,8 +143,11 @@ struct UserLoginView: View {
         // 先配置服务器地址
         NetworkManager.shared.setBaseUrl(url: url)
         
-        userStore.login(username: username, password: password) { name in
-            print(name)
+        userStore.login(username: username, password: password) { user in
+            // 登录成功
+            withAnimation(.snappy) {
+                authManager.login(user)
+            }
         } failure: { err in
             loginErrorStr = err
             showLoginError = true
@@ -122,6 +156,6 @@ struct UserLoginView: View {
 }
 
 #Preview {
-    UserLoginView()
+    UserLoginView(isPresented: .constant(true))
         .environmentObject(AuthManager.shared)
 }

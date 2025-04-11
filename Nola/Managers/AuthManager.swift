@@ -19,6 +19,7 @@ class AuthManager: ObservableObject {
         checkLoginStatus()
     }
     
+    
     /// 判断当前是否已经登录
     private func checkLoginStatus() {
         let userData = UserDefaults.standard.data(forKey: userKey)

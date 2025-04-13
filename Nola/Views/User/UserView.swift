@@ -21,6 +21,8 @@ struct UserView: View {
     
     @State private var showLoginSheet = false
     
+    @State private var showLogoutAlert = false
+    
     private var isLight: Bool {
         colorScheme == .light
     }
@@ -57,24 +59,29 @@ struct UserView: View {
                         // 如果当前未登录，显示登录页面
                         if !authManager.isLoggedIn {
                             showLoginSheet.toggle()
-                        } else {
-                            // 当前已登录，点击后退出登录（#### 测试代码 ####）
-                            authManager.logout()
-                            showLoginSheet.toggle()
                         }
                     }
                     .frame(maxHeight: 110)
-                    Spacer()
+                    
+                    
+                    // 底部控制面板
+                    ControllerPanelView(user: authManager.currentUser, onLogoutClick: {
+                        showLogoutAlert = true
+                    })
                 }
                 .padding()
                 .sheet(isPresented: $showLoginSheet) {
                     UserLoginView(isPresented: $showLoginSheet)
+                }
+                .confirmAlert(isPresented: $showLogoutAlert, message: "确定要退出登录吗") {
+                    authManager.logout()
                 }
             }
         }
     }
 }
 
+/// 用户详细信息
 private struct UserDetail: View {
     
     var user: User
@@ -83,7 +90,6 @@ private struct UserDetail: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(user.displayName)
                 .font(.title2)
-                .fontDesign(.rounded)
             
             Text(user.email)
                 .foregroundStyle(.secondary)
@@ -97,10 +103,109 @@ private struct UserDetail: View {
                     .fontDesign(.rounded)
                     .font(.caption)
             }
-
+            
         }
     }
 }
+
+
+
+/// 控制面板
+private struct ControllerPanelView: View {
+    
+    var user: User?
+    
+    // 退出登录点击事件
+    var onLogoutClick: () -> Void = {}
+    
+    
+    private var groups: [UserControllerGroup] {
+        return [
+            UserControllerGroup(name: "BLOG", items: [
+                UserControllerItem(icon: "person.circle", name: "管理员信息", destination: AdminInfoView()),
+                UserControllerItem(icon: "gear.circle", name: "博客设置", destination: BlogSettingView()),
+                UserControllerItem(icon: "arrow.clockwise.circle", name: "博客备份", destination: BlogBackupView())
+            ]),
+            UserControllerGroup(name: "APP", items: [
+                UserControllerItem(icon: "arrow.left.circle", name: "退出登录") {
+                    onLogoutClick()
+                }
+            ]),
+        ]
+    }
+    
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.flexible())], spacing: .defaultSpacing) {
+            ForEach(groups, id: \.id) { group in
+                ControllerPanelGroup(group: group)
+            }
+        }
+        .fontDesign(.rounded)
+    }
+    
+    
+    /// 控制面板组
+    private struct ControllerPanelGroup: View {
+        
+        let group: UserControllerGroup
+        
+        var body: some View {
+            Section {
+                ForEach(group.items, id: \.id) { item in
+                    if item.destination != nil {
+                        NavigationLink {
+                            item.destination
+                        } label: {
+                            ControllerPanelItemView(item: item)
+                        }
+                    } else {
+                        Button(action: item.onClick) {
+                            ControllerPanelItemView(item: item)
+                        }
+                    }
+                }
+            } header: {
+                Text(group.name)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding([.leading, .top], .defaultSpacing)
+                    .fontDesign(.rounded)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+    
+    /// 控制面板点击项
+    private struct ControllerPanelItemView: View {
+        
+        var item: UserControllerItem
+        
+        var body: some View {
+            Card {
+                HStack(alignment: .center, spacing: .defaultSpacing) {
+                    Image(systemName: item.icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18)
+                        .symbolEffect(.rotate.byLayer, options: .nonRepeating)
+                    Text(item.name)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 6)
+                        .foregroundStyle(.secondary)
+                        .symbolEffect(.bounce.down.byLayer, options: .nonRepeating)
+                }
+                .foregroundStyle(.foreground)
+                .padding()
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+
 
 #Preview {
     UserView()

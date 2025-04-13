@@ -26,7 +26,7 @@ struct Card<Content: View>: View {
         VStack(alignment: alignment, spacing: spacing) {
             content
         }
-        .background(Color(.secondarySystemBackground))
+        .background(.ultraThickMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }

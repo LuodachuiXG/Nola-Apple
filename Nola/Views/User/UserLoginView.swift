@@ -72,8 +72,10 @@ struct UserLoginView: View {
                         .animation(.spring, value: focusedField)
                         .submitLabel(.next)
                         .textContentType(.URL)
+#if os(iOS)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
+#endif
                         .onSubmit {
                             focusedField = .username
                         }
@@ -85,7 +87,9 @@ struct UserLoginView: View {
                         .animation(.spring, value: focusedField)
                         .submitLabel(.next)
                         .textContentType(.username)
+#if os(iOS)
                         .textInputAutocapitalization(.never)
+#endif
                         .onSubmit {
                             focusedField = .password
                         }

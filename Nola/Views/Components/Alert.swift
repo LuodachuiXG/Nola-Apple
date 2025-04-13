@@ -14,7 +14,21 @@ extension View {
     /// 显示一个 OK 确定按钮
     func messageAlert(isPresented: Binding<Bool>, message: LocalizedStringKey) -> some View {
         return self.alert(message, isPresented: isPresented) {
-            Button("好的") {
+            Button("好的", role: .cancel) {
+                isPresented.wrappedValue = false
+            }
+        }
+    }
+    
+    /// 确定弹窗
+    /// 显示一个确定和取消按钮
+    func confirmAlert(isPresented: Binding<Bool>, message: LocalizedStringKey, onConfirm: @escaping () -> Void) -> some View {
+        return self.alert(message, isPresented: isPresented) {
+            Button("取消", role: .cancel) {
+                isPresented.wrappedValue = false
+            }
+            Button("确定", role: .destructive) {
+                onConfirm()
                 isPresented.wrappedValue = false
             }
         }

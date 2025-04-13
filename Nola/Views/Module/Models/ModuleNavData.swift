@@ -17,7 +17,7 @@ import SwiftUI
 ///   - icon: 导航图标.
 ///   - count 数量，默认 -1 不显示
 ///   - destination: 导航目的地.
-struct ModuleNav: Identifiable {
+struct ModuleNavData: Identifiable {
     let id = UUID()
     let title: String
     let icon: String

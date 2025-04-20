@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Combine
+
 
 enum HttpMethod: String {
     case get = "GET"
@@ -23,12 +23,18 @@ class NetworkManager {
     
     private var baseUrl: String? = nil
     
-    
     private let baseUrlKey = "baseUrl"
+    
+    private let authManager = AuthManager.shared
     
     init() {
         // 尝试读取之前保存的 baseUrl
         baseUrl = UserDefaults.standard.string(forKey: baseUrlKey)
+    }
+    
+    /// 获取服务器 URL
+    func getBaseUrl() -> String? {
+        return baseUrl
     }
     
     /// 设置服务器 URL
@@ -42,7 +48,7 @@ class NetworkManager {
     func request<T: Codable>(
         endpoint: String,
         method: HttpMethod,
-        parameters: [String: Any]? = nil
+        parameters: [String: Any?]? = nil
     ) async throws -> ApiResponse<T>  {
         
         guard let base = baseUrl else {
@@ -57,6 +63,11 @@ class NetworkManager {
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = timeoutInterval
+        
+        // Token
+        if let user = authManager.currentUser {
+            request.setValue("Bearer \(user.token)", forHTTPHeaderField: "Authorization")
+        }
         
         if let parameters = parameters {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters)

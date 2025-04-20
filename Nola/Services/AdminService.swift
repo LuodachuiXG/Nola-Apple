@@ -29,4 +29,44 @@ struct AdminService {
             parameters: parameters
         )
     }
+    
+    /// 登录有效性检查
+    static func validate() async throws -> ApiResponse<Bool> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/user/validate",
+            method: .get
+        )
+    }
+    
+    /// 获取管理员信息
+    static func getAdminInfo() async throws -> ApiResponse<UserInfo> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/user",
+            method: .get
+        )
+    }
+    
+    
+    /// 修改管理员信息
+    static func updateAdminInfo(
+        username: String,
+        email: String,
+        displayName: String,
+        description: String?,
+        avatar: String?
+    ) async throws -> ApiResponse<Bool> {
+        let params = [
+            "username": username,
+            "email": email,
+            "displayName": displayName,
+            "description": description,
+            "avatar": avatar
+        ]
+        
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/user",
+            method: .put,
+            parameters: params
+        )
+    }
 }

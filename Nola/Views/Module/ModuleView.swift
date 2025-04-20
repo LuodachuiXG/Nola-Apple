@@ -23,7 +23,7 @@ struct ModuleView: View {
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
     
     var body: some View {
-        NavigationSplitView {
+        NavigationStack {
             ScrollView {
                 // 每行两列的网格布局
                 LazyVGrid(columns: columns, spacing: 15) {
@@ -37,10 +37,8 @@ struct ModuleView: View {
                     }
                 }
                 .padding()
-                .navigationTitle("模块")
             }
-        } detail: {
-            Text("选择一个模块")
+            .navigationTitle("模块")
         }
     }
 }

@@ -12,14 +12,17 @@ import SwiftUI
 /// 用户控制项组实体类
 /// - Parameters:
 ///   - name: 组名
+///   - auth: 是否需要登录后才能访问
 ///   - items: 项数组
 struct UserControllerGroup: Identifiable {
     let id = UUID()
     let name: String
+    let auth: Bool
     let items: [UserControllerItem]
     
-    init(name: String, items: [UserControllerItem]) {
+    init(name: String, auth: Bool = true, items: [UserControllerItem]) {
         self.name = name
+        self.auth = auth
         self.items = items
     }
 }

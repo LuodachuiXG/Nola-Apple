@@ -9,7 +9,7 @@ import SwiftUI
 
 struct UserLoginView: View {
     
-    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject private var authManager: AuthManager
     
     @StateObject private var userStore = UserViewModel()
     
@@ -30,6 +30,8 @@ struct UserLoginView: View {
     // 登录错误
     @State private var showLoginError = false
     @State private var loginErrorStr = ""
+    
+    @State private var isLoading = false
     
     
     private enum Field: Hashable {
@@ -105,7 +107,7 @@ struct UserLoginView: View {
                             focusedField = nil
                         }
                     
-                    if userStore.isLoading {
+                    if isLoading {
                         ProgressView()
                     } else {
                         Button("登录") {
@@ -128,11 +130,13 @@ struct UserLoginView: View {
         .messageAlert(isPresented: $showInputError, message: "请将内容输入完整")
         .messageAlert(isPresented: $showUrlError, message: "请输入正确的站点地址")
         .messageAlert(isPresented: $showLoginError, message: LocalizedStringKey(loginErrorStr))
-        .loadingAlert(isPresented: $userStore.isLoading, message: "正在登录", closableAfter: .seconds(5))
+        .loadingAlert(isPresented: $isLoading, message: "正在登录", closableAfter: .seconds(5))
     }
     
     
     private func login() {
+        isLoading = true
+        
         if url.isEmpty || username.isEmpty || password.isEmpty {
             showInputError = true
             return
@@ -148,11 +152,13 @@ struct UserLoginView: View {
         NetworkManager.shared.setBaseUrl(url: url)
         
         userStore.login(username: username, password: password) { user in
+            isLoading = false
             // 登录成功
             withAnimation(.snappy) {
                 authManager.login(user)
             }
         } failure: { err in
+            isLoading = false
             loginErrorStr = err
             showLoginError = true
         }

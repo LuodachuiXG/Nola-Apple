@@ -38,7 +38,6 @@ struct UserView: View {
                                 if !authManager.isLoggedIn {
                                     // 未登录
                                     HStack {
-                                        Image(systemName: "lock.fill")
                                         Text("未登录 Nola")
                                             .font(.custom("user_title", size: 22, relativeTo: .title ))
                                     }
@@ -65,9 +64,9 @@ struct UserView: View {
                     
                     
                     // 底部控制面板
-                    ControllerPanelView(user: authManager.currentUser, onLogoutClick: {
+                    ControllerPanelView(user: authManager.currentUser) {
                         showLogoutAlert = true
-                    })
+                    }
                 }
                 .padding()
                 .sheet(isPresented: $showLoginSheet) {
@@ -120,24 +119,33 @@ private struct ControllerPanelView: View {
     
     
     private var groups: [UserControllerGroup] {
-        return [
+        
+        var group = [
             UserControllerGroup(name: "BLOG", items: [
                 UserControllerItem(icon: "person.circle", name: "管理员信息", destination: AdminInfoView()),
                 UserControllerItem(icon: "gear.circle", name: "博客设置", destination: BlogSettingView()),
                 UserControllerItem(icon: "arrow.clockwise.circle", name: "博客备份", destination: BlogBackupView())
-            ]),
-            UserControllerGroup(name: "APP", items: [
-                UserControllerItem(icon: "arrow.left.circle", name: "退出登录") {
-                    onLogoutClick()
-                }
-            ]),
+            ])
         ]
+        
+        // 登录后才显示退出登录的按钮
+        if user != nil {
+            group.append(
+                UserControllerGroup(name: "APP", items: [
+                    UserControllerItem(icon: "arrow.left.circle", name: "退出登录") {
+                        onLogoutClick()
+                    }
+                ])
+            )
+        }
+        
+        return group
     }
     
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible())], spacing: .defaultSpacing) {
             ForEach(groups, id: \.id) { group in
-                ControllerPanelGroup(group: group)
+                ControllerPanelGroup(group: group, user: user)
             }
         }
         .fontDesign(.rounded)
@@ -149,6 +157,11 @@ private struct ControllerPanelView: View {
         
         let group: UserControllerGroup
         
+        let user: User?
+        
+        // 是否显示提示未登录弹窗
+        @State private var showNotLoginAlert = false
+        
         var body: some View {
             Section {
                 ForEach(group.items, id: \.id) { item in
@@ -157,6 +170,12 @@ private struct ControllerPanelView: View {
                             item.destination
                         } label: {
                             ControllerPanelItemView(item: item)
+                        }
+                        .disabled(user == nil && group.auth)
+                        .onTapGesture {
+                            if user == nil && group.auth {
+                                showNotLoginAlert = true
+                            }
                         }
                     } else {
                         Button(action: item.onClick) {
@@ -172,6 +191,7 @@ private struct ControllerPanelView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .messageAlert(isPresented: $showNotLoginAlert, message: "请先登录 Nola")
         }
     }
     
@@ -187,7 +207,7 @@ private struct ControllerPanelView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 18)
-                        .symbolEffect(.rotate.byLayer, options: .nonRepeating)
+                        .symbolEffect(.rotate.byLayer, options: .speed(3).nonRepeating)
                     Text(item.name)
                     Spacer()
                     Image(systemName: "chevron.right")

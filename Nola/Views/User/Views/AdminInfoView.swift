@@ -26,9 +26,6 @@ struct AdminInfoView: View {
     @State private var showErrorAlert = false
     @State private var errorAlertMsg = ""
     
-    // 显示保存成功
-    @State private var showSaveSuccess = false
-    
     var body: some View {
         List {
             HStack {
@@ -95,29 +92,21 @@ struct AdminInfoView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .shadow(color: .secondary.opacity(0.2), radius: 5)
             }
-            
-            Section {
-                Button {
-                    updateInfo()
-                } label: {
-                    HStack {
-                        if isLoading && !showSaveSuccess {
-                            ProgressView()
-                        }
-                        
-                        if showSaveSuccess {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.green)
-                            Text("保存成功")
-                                .foregroundStyle(.green)
-                        } else {
-                            Text("完成")
-                        }
-                    }
-                }.disabled(isLoading || showSaveSuccess)
-            }
         }
         .navigationTitle("管理员信息")
+        .toolbar(content: {
+            Button {
+                updateInfo()
+            } label: {
+                HStack {
+                    if isLoading {
+                        ProgressView()
+                    } else {
+                        Text("保存")
+                    }
+                }
+            }.disabled(isLoading)
+        })
         .onAppear {
             getAdminInfo()
         }
@@ -157,7 +146,7 @@ struct AdminInfoView: View {
             success: {
                 // 获取最新的管理员数据
                 getAdminInfo()
-                $showSaveSuccess.toggleDuration(duration: 1.5)
+                dismiss()
             },
             failure: { err in
                 isLoading = false

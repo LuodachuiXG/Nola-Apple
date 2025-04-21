@@ -13,7 +13,7 @@ extension Binding<Bool> {
     /// - Parameters:
     ///   - duration: 延迟恢复时间
     ///   - animate: 是否有动画（默认 true）
-    func toggleDuration(duration: Double, animate: Bool = true) {
+    func toggleDuration(duration: Double = 1.0, animate: Bool = true) {
         if animate {
             withAnimation {
                 self.wrappedValue.toggle()

@@ -38,8 +38,10 @@ class AuthManager: ObservableObject {
         do {
             let data = try encoder.encode(user)
             UserDefaults.standard.set(data, forKey: userKey)
-            currentUser = user
-            isLoggedIn = true
+            DispatchQueue.main.async {
+                self.currentUser = user
+                self.isLoggedIn = true
+            }
         } catch {
             print(error)
         }
@@ -48,7 +50,9 @@ class AuthManager: ObservableObject {
     /// 登出
     func logout() {
         UserDefaults.standard.removeObject(forKey: userKey)
-        currentUser = nil
-        isLoggedIn = false
+        DispatchQueue.main.async {
+            self.currentUser = nil
+            self.isLoggedIn = false
+        }
     }
 }

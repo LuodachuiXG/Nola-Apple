@@ -143,7 +143,7 @@ private struct ControllerPanelView: View {
     }
     
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible())], spacing: .defaultSpacing) {
+        VStack(spacing: .defaultSpacing) {
             ForEach(groups, id: \.id) { group in
                 ControllerPanelGroup(group: group, user: user)
             }

@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Combine
 
+/// 管理员相关接口
 struct AdminService {
     
     /// 登录接口
@@ -65,6 +65,23 @@ struct AdminService {
         
         return try await NetworkManager.shared.request(
             endpoint: "/admin/user",
+            method: .put,
+            parameters: params
+        )
+    }
+    
+    /// 修改管理员密码
+    /// - Parameters:
+    ///   - password: 新密码
+    static func updateAdminPassword(
+        password: String
+    ) async throws -> ApiResponse<Bool> {
+        let params = [
+            "password": password
+        ]
+        
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/user/password",
             method: .put,
             parameters: params
         )

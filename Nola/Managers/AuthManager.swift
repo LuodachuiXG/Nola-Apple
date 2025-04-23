@@ -15,7 +15,7 @@ class AuthManager: ObservableObject {
     
     private let userKey = "userKey"
     
-    init() {
+    private init() {
         checkLoginStatus()
     }
     

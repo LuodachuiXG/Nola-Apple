@@ -11,7 +11,7 @@ import SwiftUI
 struct AdminInfoView: View {
     
     @EnvironmentObject private var authManager: AuthManager
-    @StateObject private var userStore = UserViewModel()
+    @StateObject private var vm = AdminInfoViewModel()
     
     @Environment(\.dismiss) var dismiss
     
@@ -94,19 +94,17 @@ struct AdminInfoView: View {
             }
         }
         .navigationTitle("管理员信息")
-        .toolbar(content: {
+        .toolbar {
             Button {
                 updateInfo()
             } label: {
-                HStack {
-                    if isLoading {
-                        ProgressView()
-                    } else {
-                        Text("保存")
-                    }
+                if isLoading {
+                    ProgressView()
+                } else {
+                    Text("保存")
                 }
             }.disabled(isLoading)
-        })
+        }
         .onAppear {
             getAdminInfo()
         }
@@ -137,7 +135,7 @@ struct AdminInfoView: View {
         
         
         isLoading = true
-        userStore.updateAdminInfo(
+        vm.updateAdminInfo(
             username: username,
             email: email,
             displayName: displayName,
@@ -159,7 +157,7 @@ struct AdminInfoView: View {
     /// 获取信息
     private func getAdminInfo() {
         isLoading = true
-        userStore.getAdminInfo { userInfo in
+        vm.getAdminInfo { userInfo in
             isLoading = false
             username = userInfo.username
             email = userInfo.email

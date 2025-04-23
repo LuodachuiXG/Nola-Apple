@@ -62,7 +62,6 @@ struct UserView: View {
                     }
                     .frame(maxHeight: 110)
                     
-                    
                     // 底部控制面板
                     ControllerPanelView(user: authManager.currentUser) {
                         showLogoutAlert = true

@@ -91,6 +91,7 @@ class NetworkManager {
             let apiResponse = try JSONDecoder().decode(ApiResponse<T>.self, from: data)
             throw ApiError(message: apiResponse.errMsg ?? "未知错误")
         case .unauthorized:
+            AuthManager.shared.logout()
             throw ApiError(message: "登录已过期")
         case .tooManyRequests:
             throw ApiError(message: "请求太频繁")

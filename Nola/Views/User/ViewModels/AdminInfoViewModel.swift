@@ -8,6 +8,7 @@
 import Foundation
 
 /// 管理员信息 ViewModel
+@MainActor
 class AdminInfoViewModel: ObservableObject {
     
     /// 修改管理员信息

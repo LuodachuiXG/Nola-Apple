@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 class UserViewModel: ObservableObject {
     
     /// 用户登录

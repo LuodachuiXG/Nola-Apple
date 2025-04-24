@@ -8,6 +8,7 @@
 import Foundation
 
 /// 博客设置 ViewModel
+@MainActor
 class BlogSettingViewModel: ObservableObject {
     
     /// 修改博客信息

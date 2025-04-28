@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-class CoreDataManager: ObservableObject {
+final class CoreDataManager: ObservableObject {
     static let shared = CoreDataManager(inMemory: false)
     
     private var inMemory: Bool = false
@@ -64,7 +64,6 @@ extension NSManagedObjectContext {
         
         do {
             try self.save()
-            print("Save Success")
         } catch {
             print("Failed to save the context: ", error.localizedDescription)
         }

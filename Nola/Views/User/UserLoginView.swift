@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import LocalAuthentication
 
 
 // 用户登陆页面
@@ -37,16 +38,18 @@ struct UserLoginView: View {
     
     @State private var isLoading = false
     
+    // 以前登录过的用户记录列表
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \UserRecord.createTime, ascending: false)],
         animation: .default
     )
     private var userRecords: FetchedResults<UserRecord>
     
-    
     private enum Field: Hashable {
         case url, username, password
     }
+    
+    @State private var selected = 0
     
     var body: some View {
         VStack(alignment: .center, spacing: .defaultSpacing) {
@@ -56,6 +59,7 @@ struct UserLoginView: View {
                 .frame(maxWidth: .infinity)
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
+            
             
             VStack(alignment: .trailing, spacing: 20) {
                 if authManager.isLoggedIn {
@@ -77,6 +81,9 @@ struct UserLoginView: View {
                         }
                     }
                 } else {
+                    
+                    LoggedUser()
+                    
                     TextField("站点地址 https://", text: $url)
                         .focused($focusedField, equals: .url)
                         .textFieldStyle(.roundedBorder)
@@ -132,18 +139,6 @@ struct UserLoginView: View {
                 .foregroundStyle(.secondary)
                 .padding(.bottom, .defaultSpacing)
         }
-        .onAppear {
-            print("appear")
-            userRecords.forEach { user in
-                print([
-                    "url": user.url,
-                    "username": user.username,
-                    "password": user.password,
-                    "createTime": user.createTime,
-                    "uuid": user.id
-                ])
-            }
-        }
         .padding([.top, .leading, .trailing], 40)
         .messageAlert(isPresented: $showInputError, message: "请将内容输入完整")
         .messageAlert(isPresented: $showUrlError, message: "请输入正确的站点地址")
@@ -182,6 +177,68 @@ struct UserLoginView: View {
             loginErrorStr = err
             showLoginError = true
         }
+    }
+}
+
+// MARK: - 登录过的账号选择
+private struct LoggedUser: View {
+    
+    var body: some View {
+        HStack(alignment: .center) {
+            AsyncImage(url: URL(string: "https://loac.cc/logo")) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 36)
+                    .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
+            } placeholder: {
+                ProgressView()
+                    .frame(width: 36, height: 36)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 10).stroke(.gray.opacity(0.2), lineWidth: 1)
+            }
+            .padding(.defaultSpacing)
+            
+            Text("Loac")
+                .font(.title3)
+            
+            Spacer()
+            
+            Text("最近登录")
+                .padding(.trailing, .defaultSpacing)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
+        .onTapGesture {
+            let context = LAContext()
+            var error: NSError?
+            
+            print(context.biometryType.rawValue)
+            
+            // 检查验证可行性
+            if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+                let reason = "验证以继续操作"
+                
+                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, err in
+                    DispatchQueue.main.async {
+                        if success {
+                            // 验证成功
+                            print("验证通过")
+                        } else {
+                            // 验证失败
+                            print(err?.localizedDescription ?? "未知错误")
+                        }
+                    }
+                }
+            } else {
+                print(error?.localizedDescription ?? "无法验证")
+            }
+        }
+        
     }
 }
 

@@ -23,13 +23,13 @@ class NetworkManager {
     
     private var baseUrl: String? = nil
     
-    private let baseUrlKey = "baseUrl"
-    
     private let authManager = AuthManager.shared
+    
+    private let store = StoreManager.shared
     
     init() {
         // 尝试读取之前保存的 baseUrl
-        baseUrl = UserDefaults.standard.string(forKey: baseUrlKey)
+        baseUrl = store.getBaseUrl()
     }
     
     /// 获取服务器 URL
@@ -42,7 +42,7 @@ class NetworkManager {
     ///   - url: 服务器 URL
     func setBaseUrl(url: String) {
         baseUrl = url
-        UserDefaults.standard.set(baseUrl, forKey: baseUrlKey)
+        store.setBaseUrl(baseUrl!)
     }
     
     func request<T: Codable>(

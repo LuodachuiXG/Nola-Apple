@@ -9,14 +9,17 @@ import SwiftUI
 
 @main
 struct NolaApp: App {
-    
+    // 登录状态管理
     @StateObject private var authManager = AuthManager.shared
-
+    // Core Data
+    @StateObject private var coreDataManager = CoreDataManager.shared
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(authManager)
+                .environment(\.storeManager, StoreManager.shared)
+                .environment(\.managedObjectContext, coreDataManager.persistentContainer.viewContext)
         }
     }
 }

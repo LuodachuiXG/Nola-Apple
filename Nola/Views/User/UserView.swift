@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 import PopupView
 
+// MARK: - 用户页面
 struct UserView: View {
     
     @EnvironmentObject var authManager: AuthManager
@@ -79,7 +80,7 @@ struct UserView: View {
     }
 }
 
-/// 用户详细信息
+// MARK: - 用户详细信息
 private struct UserDetail: View {
     
     var user: User
@@ -108,7 +109,7 @@ private struct UserDetail: View {
 
 
 
-/// 控制面板
+// MARK: - 控制面板
 private struct ControllerPanelView: View {
     
     var user: User?

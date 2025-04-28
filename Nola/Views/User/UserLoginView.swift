@@ -7,7 +7,11 @@
 
 import SwiftUI
 
+
+// 用户登陆页面
 struct UserLoginView: View {
+    
+    @Environment(\.managedObjectContext) private var viewContext
     
     @EnvironmentObject private var authManager: AuthManager
     
@@ -32,6 +36,12 @@ struct UserLoginView: View {
     @State private var loginErrorStr = ""
     
     @State private var isLoading = false
+    
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \UserRecord.createTime, ascending: false)],
+        animation: .default
+    )
+    private var userRecords: FetchedResults<UserRecord>
     
     
     private enum Field: Hashable {
@@ -74,10 +84,8 @@ struct UserLoginView: View {
                         .animation(.spring, value: focusedField)
                         .submitLabel(.next)
                         .textContentType(.URL)
-#if os(iOS)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
-#endif
                         .onSubmit {
                             focusedField = .username
                         }
@@ -89,9 +97,7 @@ struct UserLoginView: View {
                         .animation(.spring, value: focusedField)
                         .submitLabel(.next)
                         .textContentType(.username)
-#if os(iOS)
                         .textInputAutocapitalization(.never)
-#endif
                         .onSubmit {
                             focusedField = .password
                         }
@@ -126,6 +132,18 @@ struct UserLoginView: View {
                 .foregroundStyle(.secondary)
                 .padding(.bottom, .defaultSpacing)
         }
+        .onAppear {
+            print("appear")
+            userRecords.forEach { user in
+                print([
+                    "url": user.url,
+                    "username": user.username,
+                    "password": user.password,
+                    "createTime": user.createTime,
+                    "uuid": user.id
+                ])
+            }
+        }
         .padding([.top, .leading, .trailing], 40)
         .messageAlert(isPresented: $showInputError, message: "请将内容输入完整")
         .messageAlert(isPresented: $showUrlError, message: "请输入正确的站点地址")
@@ -139,12 +157,14 @@ struct UserLoginView: View {
         
         if url.isEmpty || username.isEmpty || password.isEmpty {
             showInputError = true
+            isLoading = false
             return
         }
         
         if !url.isValidUrl() {
             // 站点地址不合法
             showUrlError = true
+            isLoading = false
             return
         }
         
@@ -168,4 +188,6 @@ struct UserLoginView: View {
 #Preview {
     UserLoginView(isPresented: .constant(true))
         .environmentObject(AuthManager.shared)
+        .environment(\.storeManager, StoreManager.shared)
+        .environment(\.managedObjectContext, CoreDataManager.preview.persistentContainer.viewContext)
 }

@@ -7,13 +7,15 @@
 
 import Foundation
 
-class AuthManager: ObservableObject {
+/// 登录状态管理
+final class AuthManager: ObservableObject {
     static let shared = AuthManager()
+    
     
     @Published var isLoggedIn = false
     @Published var currentUser: User?
     
-    private let userKey = "userKey"
+    private let store = StoreManager.shared
     
     private init() {
         checkLoginStatus()
@@ -22,12 +24,9 @@ class AuthManager: ObservableObject {
     
     /// 判断当前是否已经登录
     private func checkLoginStatus() {
-        let userData = UserDefaults.standard.data(forKey: userKey)
-        isLoggedIn = userData != nil
-        if let data = userData {
-            let decoder = JSONDecoder()
-            currentUser = try? decoder.decode(User.self, from: data)
-        }
+        let user = store.getUser()
+        isLoggedIn = user != nil
+        currentUser = user
     }
     
     /// 登录成功，保存登录信息
@@ -35,21 +34,16 @@ class AuthManager: ObservableObject {
     ///   - user: 用户
     func login(_ user: User) {
         let encoder = JSONEncoder()
-        do {
-            let data = try encoder.encode(user)
-            UserDefaults.standard.set(data, forKey: userKey)
-            DispatchQueue.main.async {
-                self.currentUser = user
-                self.isLoggedIn = true
-            }
-        } catch {
-            print(error)
+        store.setUser(user)
+        DispatchQueue.main.async {
+            self.currentUser = user
+            self.isLoggedIn = true
         }
     }
     
     /// 登出
     func logout() {
-        UserDefaults.standard.removeObject(forKey: userKey)
+        store.removeUser()
         DispatchQueue.main.async {
             self.currentUser = nil
             self.isLoggedIn = false

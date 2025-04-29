@@ -34,7 +34,10 @@ struct UserView: View {
                 VStack(spacing: 20) {
                     Card {
                         HStack(alignment: .top, spacing: 20) {
-                            UserAvatar(user: authManager.currentUser)
+                            UserAvatar(
+                                displayName: authManager.currentUser?.displayName ?? "Nola",
+                                avatar: authManager.currentUser?.avatar
+                            )
                             VStack(alignment: .leading ,spacing: 4) {
                                 if !authManager.isLoggedIn {
                                     // 未登录

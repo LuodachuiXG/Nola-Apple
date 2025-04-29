@@ -59,7 +59,7 @@ final class StoreManager {
     
 }
 
-/// 环境键
+// MARK: - 环境键
 struct StoreManagerKey: EnvironmentKey {
     // 提供环境键默认值
     static let defaultValue: StoreManager = StoreManager.shared

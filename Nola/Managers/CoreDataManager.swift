@@ -42,8 +42,9 @@ final class CoreDataManager: ObservableObject {
             userRecord.id = UUID()
             userRecord.url = "https://\(i).loac.cc"
             userRecord.username = "loac\(i)"
-            userRecord.password = String(repeating: String(i), count: 10)
-            userRecord.createTime = Date()
+            userRecord.avatar = "https://loac.cc/logo"
+            userRecord.lastLoginTime = Date()
+            userRecord.displayName = "Loac"
         }
         context.saveChanges()
         

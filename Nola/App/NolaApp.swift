@@ -19,6 +19,7 @@ struct NolaApp: App {
             ContentView()
                 .environmentObject(authManager)
                 .environment(\.storeManager, StoreManager.shared)
+                .environment(\.keychain, KeychainManager.shared)
                 .environment(\.managedObjectContext, coreDataManager.persistentContainer.viewContext)
         }
     }

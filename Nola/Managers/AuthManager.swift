@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 /// 登录状态管理
 final class AuthManager: ObservableObject {
@@ -33,11 +34,12 @@ final class AuthManager: ObservableObject {
     /// - Parameters:
     ///   - user: 用户
     func login(_ user: User) {
-        let encoder = JSONEncoder()
         store.setUser(user)
         DispatchQueue.main.async {
-            self.currentUser = user
-            self.isLoggedIn = true
+            withAnimation {
+                self.currentUser = user
+                self.isLoggedIn = true
+            }
         }
     }
     
@@ -45,8 +47,10 @@ final class AuthManager: ObservableObject {
     func logout() {
         store.removeUser()
         DispatchQueue.main.async {
-            self.currentUser = nil
-            self.isLoggedIn = false
+            withAnimation {
+                self.currentUser = nil
+                self.isLoggedIn = false
+            }
         }
     }
 }

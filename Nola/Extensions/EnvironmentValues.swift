@@ -15,4 +15,9 @@ extension EnvironmentValues {
         get { self[StoreManagerKey.self] }
         set { self[StoreManagerKey.self] = newValue }
     }
+    
+    var keychain: KeychainManager {
+        get { self[KeychainEnvironmentKey.self] }
+        set { self[KeychainEnvironmentKey.self] = newValue }
+    }
 }

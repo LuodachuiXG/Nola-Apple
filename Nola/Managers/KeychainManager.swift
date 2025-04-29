@@ -7,6 +7,7 @@
 
 import Foundation
 import Security
+import SwiftUI
 
 final class KeychainManager {
     
@@ -17,15 +18,18 @@ final class KeychainManager {
     private let service = "cc.loac.nola"
     
     /// 保存已登录用户的账号和密码
+    /// - Parameters:
+    ///   - username: 用户名
+    ///   - password: 密码
     func saveLoggedUser(
         username: String,
-        password: String
+        password: String,
     ) -> Bool {
         
         let passwordData = password.data(using: .utf8)!
         
         let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
+            kSecClass as String: kSecClassInternetPassword,
             kSecAttrAccount as String: username,
             kSecAttrServer as String: service,
             kSecValueData as String: passwordData
@@ -46,14 +50,14 @@ final class KeychainManager {
     }
     
     
-    /// 根据 username 获取登录密码
+    /// 根据 username 获取登录密码和服务器地址
     func getLoggedUserPassword(
         username: String
     ) -> String? {
         let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: username,
+            kSecClass as String: kSecClassInternetPassword,
             kSecAttrServer as String: service,
+            kSecAttrAccount as String: username,
             kSecReturnData as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
@@ -91,4 +95,11 @@ final class KeychainManager {
     }
     
     
+}
+
+
+// MARK: - 环境键
+struct KeychainEnvironmentKey: EnvironmentKey {
+    // 提供环境键默认值
+    static let defaultValue: KeychainManager = KeychainManager.shared
 }

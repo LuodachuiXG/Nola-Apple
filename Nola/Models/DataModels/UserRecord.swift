@@ -22,11 +22,15 @@ final class UserRecord: NSManagedObject {
     @NSManaged
     var username: String
     
-    // 密码
+    // 昵称
     @NSManaged
-    var password: String
+    var displayName: String
     
-    // 创建时间
+    // 头像
     @NSManaged
-    var createTime: Date
+    var avatar: String
+    
+    // 最后登录时间
+    @NSManaged
+    var lastLoginTime: Date
 }

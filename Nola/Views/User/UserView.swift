@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Combine
-import PopupView
 
 // MARK: - 用户页面
 struct UserView: View {
@@ -232,5 +231,6 @@ private struct ControllerPanelView: View {
 
 #Preview {
     UserView()
+        .environment(\.managedObjectContext, CoreDataManager.preview.persistentContainer.viewContext)
         .environmentObject(AuthManager.shared)
 }

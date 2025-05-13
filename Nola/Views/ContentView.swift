@@ -16,23 +16,43 @@ struct ContentView: View {
     // 是否现实登录过期弹窗
     @State private var showLoginExpiredAlert = false
     
+    @State private var showErrorDialog = false
+    @State private var errorDialogMsg = ""
+    
     var body: some View {
         TabView {
             Tab("概览", systemImage: "waveform.path.ecg.rectangle") {
-                OverviewView()
+                OverviewView(contentVM: vm)
             }
             
             Tab("模块", systemImage: "xmark.triangle.circle.square") {
-                ModuleView().navigationTitle("模块")
+                ModuleView(contentVM: vm)
             }
             
             Tab("用户", systemImage: "person") {
                 UserView()
             }
-        }.onAppear {
+        }.task {
             verifyLogin()
-        }
+        }.onChange(of: authManager.isLoggedIn, { oldValue, newValue in
+            if !oldValue && newValue {
+                // 用户登陆，刷新博客概览数据
+                refreshOverview()
+            } else if oldValue && !newValue {
+                // 用户登录退出
+                vm.clearOverview()
+            }
+        })
         .messageAlert(isPresented: $showLoginExpiredAlert, message: "登录已过期")
+        .messageAlert(isPresented: $showErrorDialog, message: LocalizedStringKey(errorDialogMsg))
+    }
+    
+    /// 刷新博客概览数据
+    private func refreshOverview() {
+        vm.refreshOverview { err in
+            self.errorDialogMsg = err
+            self.showErrorDialog = true
+        }
     }
     
     
@@ -43,6 +63,9 @@ struct ContentView: View {
             vm.userLoginValidate {
                 // 登录有效
                 uiLog.debug("\(user.username) 登录有效")
+                
+                // 获取博客概览数据
+                refreshOverview()
             } onExpired: {
                 // 登录过期
                 showLoginExpiredAlert = true
@@ -55,5 +78,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(\.managedObjectContext, CoreDataManager.preview.persistentContainer.viewContext)
         .environmentObject(AuthManager.shared)
 }

@@ -22,14 +22,10 @@ struct ModuleButton: View {
                 
                 Spacer()
                 
-                Text(button.count < 0 ? "-" : String(button.count))
+                Text(button.count == nil || button.count! < 0 ? "-" : String(button.count!))
                     .font(.title2)
                     .fontWeight(.semibold)
-#if os(macOS)
-                    .foregroundStyle(Color(.labelColor))
-#elseif os(iOS)
                     .foregroundStyle(Color(.label))
-#endif
             }
             .padding(.horizontal)
             .padding(.top)
@@ -44,11 +40,7 @@ struct ModuleButton: View {
             .padding(.horizontal)
             .padding(.bottom)
             .padding(.top, .defaultSpacing)
-#if os(macOS)
-            .foregroundStyle(Color(.labelColor))
-#elseif os(iOS)
             .foregroundStyle(Color(.label))
-#endif
             
         }
         .frame(maxWidth: .infinity, minHeight: 100)
@@ -58,5 +50,5 @@ struct ModuleButton: View {
 }
 
 #Preview {
-    ModuleButton(button: ModuleNavData(title: "文章", icon: "book", destination: Text("文章")))
+    ModuleButton(button: ModuleNavData(title: "文章", icon: "book", destination: Text("文章"), count: 10))
 }

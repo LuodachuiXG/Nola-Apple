@@ -18,4 +18,14 @@ extension Int64 {
         let date = Date(timeIntervalSince1970: interval)
         return formatter.string(from: date)
     }
+    
+    
+    /// 计算时间戳到今天已经有多少天了
+    /// - returns: 返回天数
+    func millisDaysSince() -> Int {
+        let date = Date(timeIntervalSince1970: TimeInterval(self) / 1000)
+        let calendar = Calendar.current
+        let days = calendar.dateComponents([.day], from: date, to: Date()).day ?? 0
+        return days
+    }
 }

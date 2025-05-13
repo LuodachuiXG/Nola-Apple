@@ -6,9 +6,40 @@
 //
 
 import Foundation
+import SwiftUI
 
-
+@MainActor
 class ContentViewModel: ObservableObject {
+    
+    @Published var blogOverview: BlogOverview?
+    
+    /// 刷新博客概览数据
+    /// - Parameters:
+    ///   - onFailure: 失败回调
+    func refreshOverview(
+        onFailure: @escaping (String) -> Void = { _ in },
+    ) {
+        Task {
+            do {
+                let res = try await OverviewService.getBlogOverview()
+                if let data = res.data {
+                    withAnimation {
+                        blogOverview = data
+                    }
+                } else {
+                    onFailure("未知错误")
+                }
+            } catch {
+                onFailure(error.localizedDescription)
+            }
+        }
+    }
+    
+    /// 清除博客概览数据
+    func clearOverview() {
+        blogOverview = nil
+    }
+    
     
     /// 判断之前登录的用户是否还在登录状态
     /// - Parameters:
@@ -28,7 +59,7 @@ class ContentViewModel: ObservableObject {
                 }
                 onExpired()
             } catch {
-               // 登录过期
+                // 登录过期
                 onExpired()
             }
         }

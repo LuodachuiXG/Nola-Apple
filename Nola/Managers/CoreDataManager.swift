@@ -12,12 +12,14 @@ final class CoreDataManager: ObservableObject {
     static let shared = CoreDataManager(inMemory: false)
     
     private var inMemory: Bool = false
+    
     lazy var persistentContainer: NSPersistentContainer = {
         
-        let container = NSPersistentContainer(name: "Nola")
+        let container = NSPersistentContainer(name: "Model")
         
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            container.persistentStoreDescriptions.first!.type = NSInMemoryStoreType
         }
         
         container.loadPersistentStores { _, error in
@@ -37,6 +39,7 @@ final class CoreDataManager: ObservableObject {
         
         // 添加预览数据
         let context = manager.persistentContainer.viewContext
+        
         for i in 0..<2 {
             let userRecord = UserRecord(context: context)
             userRecord.id = UUID()
@@ -46,7 +49,12 @@ final class CoreDataManager: ObservableObject {
             userRecord.lastLoginTime = Date()
             userRecord.displayName = "Loac"
         }
-        context.saveChanges()
+        
+        do {
+            try context.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
         
         return manager
     }()
@@ -59,7 +67,8 @@ final class CoreDataManager: ObservableObject {
 
 
 extension NSManagedObjectContext {
-    func saveChanges() {
+    
+    func saveIfHasChange() {
         // 检查是否有修改
         guard self.hasChanges else { return }
         
@@ -68,5 +77,11 @@ extension NSManagedObjectContext {
         } catch {
             print("Failed to save the context: ", error.localizedDescription)
         }
+        
+        func delete<Item: NSManagedObject>(item: Item) {
+            self.delete(item)
+            saveIfHasChange()
+        }
     }
+    
 }

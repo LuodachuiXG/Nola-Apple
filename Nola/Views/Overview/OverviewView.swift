@@ -7,31 +7,49 @@
 
 import SwiftUI
 
+/// 概览页面
 struct OverviewView: View {
-    @State private var showSheet = false
+    
+    @ObservedObject var contentVM: ContentViewModel
+    
+    private let gridCols = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
     
     var body: some View {
         NavigationStack {
-            VStack {
-                List {
-                    NavigationLink("详情", value: "detail")
-                }
-                .navigationTitle("概览")
-                .navigationDestination(for: String.self) { str in
-                    Text(str).onTapGesture {
-                        showSheet.toggle()
+            ScrollView([.vertical]) {
+                VStack(alignment: .leading, spacing: .defaultSpacing) {
+                    // 浏览最多的文章卡片
+                    if let post = contentVM.blogOverview?.mostViewedPost {
+                        Text("浏览量最多")
+                            .font(.title)
+                            .fontWeight(.semibold)
+                        MostViewedPostCard(post: post)
                     }
-                    .sheet(isPresented: $showSheet) {
-                        Text("你好").onTapGesture {
-                            showSheet.toggle()
+                    
+                    LazyVGrid(columns: gridCols) {
+                        // 博客已创建时间
+                        if let creatTime = contentVM.blogOverview?.createDate {
+                            BlogCreateTimeCard(createTime: creatTime)
+                                .aspectRatio(1, contentMode: .fill)
+                        }
+                        
+                        // 博客已创建时间
+                        if let creatTime = contentVM.blogOverview?.createDate {
+                            BlogCreateTimeCard(createTime: creatTime)
+                                .aspectRatio(1, contentMode: .fill)
                         }
                     }
-                }
+                                    
+                    Spacer()
+                }.padding()
             }
         }
     }
 }
 
 #Preview {
-    OverviewView()
+    OverviewView(contentVM: ContentViewModel())
 }

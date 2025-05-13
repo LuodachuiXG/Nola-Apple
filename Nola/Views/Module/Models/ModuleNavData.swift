@@ -21,10 +21,10 @@ struct ModuleNavData: Identifiable {
     let id = UUID()
     let title: String
     let icon: String
-    let count: Int
+    let count: Int?
     let destination: AnyView
     
-    init(title: String, icon: String, destination: some View, count: Int = -1) {
+    init(title: String, icon: String, destination: some View, count: Int?) {
         self.title = title
         self.icon = icon
         self.count = count

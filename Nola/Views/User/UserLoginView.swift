@@ -18,7 +18,7 @@ struct UserLoginView: View {
     
     @EnvironmentObject private var authManager: AuthManager
     
-    @StateObject private var userStore = UserViewModel()
+    @StateObject private var viewModel = UserViewModel()
     
     // 当前 Sheet 是否显示
     @Binding var isPresented: Bool
@@ -189,7 +189,7 @@ struct UserLoginView: View {
         // 先配置服务器地址
         NetworkManager.shared.setBaseUrl(url: url)
         
-        userStore.login(username: username, password: password) { user in
+        viewModel.login(username: username, password: password) { user in
             // 登录成功
             
             // 将密码保存到 keychain
@@ -201,7 +201,7 @@ struct UserLoginView: View {
                 userRecord.username = username
                 userRecord.lastLoginTime = Date()
                 userRecord.avatar = user.avatar ?? ""
-                viewContext.saveChanges()
+                viewContext.saveIfHasChange()
             }
             
             withAnimation(.snappy) {
@@ -301,8 +301,9 @@ private struct LoggedUser: View {
 
 #Preview {
     UserLoginView(isPresented: .constant(true))
+        .environment(\.managedObjectContext, CoreDataManager.preview.persistentContainer.viewContext)
         .environmentObject(AuthManager.shared)
         .environment(\.storeManager, StoreManager.shared)
         .environment(\.keychain, KeychainManager.shared)
-        .environment(\.managedObjectContext, CoreDataManager.preview.persistentContainer.viewContext)
+        
 }

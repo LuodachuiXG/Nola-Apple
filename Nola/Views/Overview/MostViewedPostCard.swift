@@ -16,10 +16,15 @@ struct MostViewedPostCard: View {
     private let feedbackGenerator = UIImpactFeedbackGenerator()
     
     var postCover: String? {
-        if let cover = post.cover {
-            return cover
+        var cover: String? = nil
+        if let c = post.cover {
+            cover = c
         } else if let category = post.category, category.unifiedCover {
-            return category.cover
+            cover = category.cover
+        }
+        
+        if let c = cover, !c.isEmpty {
+            return c
         } else {
             return nil
         }
@@ -54,22 +59,26 @@ struct MostViewedPostCard: View {
             }
             
             VStack {
-                Spacer()
+                
+                if postCover != nil {
+                    Spacer()
+                }
+                
                 HStack {
                     VStack(alignment: .leading) {
                         HStack {
                             Text(post.title)
                                 .font(.title3)
                                 .lineLimit(1)
-                                .foregroundStyle(Color.white)
-                                .shadow(radius: .defaultShadowRadius)
+                                .foregroundStyle(postCover == nil ? Color.primary : Color.white)
+                                .shadow(radius: postCover == nil ? 0 : .defaultShadowRadius)
                         }
                         
                         Text(caption)
                             .font(.caption)
-                            .foregroundStyle(Color.white.opacity(0.6))
+                            .foregroundStyle(postCover == nil ? Color.secondary : Color.white)
                             .lineLimit(1)
-                            .shadow(radius: .defaultShadowRadius)
+                            .shadow(radius: postCover == nil ? 0 : .defaultShadowRadius)
                         
                     }
                     Spacer()
@@ -77,12 +86,12 @@ struct MostViewedPostCard: View {
                 .padding(.defaultSpacing)
                 .background(.ultraThinMaterial)
                 
-            }.frame(maxHeight: 230)
+            }.frame(maxHeight: postCover == nil ? 52 : 230)
         }
-        .frame(maxWidth: .infinity, minHeight: 230)
+        .frame(maxWidth: .infinity, minHeight: postCover == nil ? 52 : 230)
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
-        .shadow(radius: .defaultShadowRadius)
+        .shadow(radius: postCover == nil ? 0 : .defaultShadowRadius)
         .onTapGesture {
             feedbackGenerator.impactOccurred()
         }

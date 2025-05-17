@@ -31,6 +31,7 @@ struct ModuleView: View {
 
             }
             .navigationTitle("模块")
+            .navigationBarTitleDisplayMode(.inline)
         }
         
     }

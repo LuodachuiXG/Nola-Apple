@@ -78,6 +78,8 @@ struct UserView: View {
                     authManager.logout()
                 }
             }
+            .navigationTitle("用户")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

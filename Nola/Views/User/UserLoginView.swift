@@ -7,6 +7,7 @@
 
 import SwiftUI
 import LocalAuthentication
+import DotLottie
 
 
 // 用户登陆页面
@@ -68,11 +69,19 @@ struct UserLoginView: View {
             VStack(alignment: .trailing, spacing: 20) {
                 if authManager.isLoggedIn {
                     VStack {
-                        Image(systemName: "checkmark.circle")
-                            .resizable()
-                            .frame(width: 120, height: 120)
-                            .foregroundStyle(.green)
-                            .padding()
+                        
+                        DotLottieAnimation(
+                            fileName: "check",
+                            config: AnimationConfig(
+                                autoplay: true,
+                                loop: true,
+                                speed: 2.5
+                            )
+                        )
+                        .view()
+                        .frame(height: 150)
+                        .padding()
+                    
                         Text("登录成功")
                             .font(.title)
                     }

@@ -1,5 +1,5 @@
 //
-//  BlogCreateTimeCard.swift
+//  StatisticalDataCard.swift
 //  Nola
 //
 //  Created by loac on 14/05/2025.
@@ -8,26 +8,26 @@
 import Foundation
 import SwiftUI
 
-/// 博客创建时间卡片
-struct BlogCreateTimeCard: View {
+/// 统计数据卡片
+struct StatisticalDataCard: View {
     
-    // 创建时间戳（毫秒）
-    var createTime: Int64
+    // 标题
+    var title: String
+    
+    // 内容
+    var content: String
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("博客已建立")
+        Card(alignment: .leading, padding: .defaultSpacing) {
+            Text(title)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .font(.title)
                 .fontWeight(.semibold)
             Spacer()
-            Text("\(createTime.millisDaysSince()) 天")
+            Text(content)
                 .font(.largeTitle)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .padding(.defaultSpacing)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
     }
 }

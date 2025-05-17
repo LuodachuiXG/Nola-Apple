@@ -10,9 +10,9 @@ import SwiftUI
 
 @MainActor
 class ContentViewModel: ObservableObject {
-    
+
     @Published var blogOverview: BlogOverview?
-    
+
     /// 刷新博客概览数据
     /// - Parameters:
     ///   - onFailure: 失败回调
@@ -34,13 +34,13 @@ class ContentViewModel: ObservableObject {
             }
         }
     }
-    
+
     /// 清除博客概览数据
     func clearOverview() {
         blogOverview = nil
     }
-    
-    
+
+
     /// 判断之前登录的用户是否还在登录状态
     /// - Parameters:
     ///   - onValid: 登录有效回调

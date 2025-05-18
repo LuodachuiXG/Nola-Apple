@@ -64,37 +64,3 @@ struct StoreManagerKey: EnvironmentKey {
     // 提供环境键默认值
     static let defaultValue: StoreManager = StoreManager.shared
 }
-
-// MARK: - User 相关
-extension StoreManager {
-    
-    /// 获取用户
-    func getUser() -> User? {
-        return data(.user)
-    }
-    
-    /// 设置用户
-    func setUser(_ user: User) {
-        set(.user, user)
-    }
-    
-    // 删除用户
-    func removeUser() {
-        remove(.user)
-    }
-}
-
-
-// MARK: - 网络相关
-extension StoreManager {
-    
-    /// 获取基地址
-    func getBaseUrl() -> String? {
-        return string(.baseUrl)
-    }
-    
-    /// 设置基地址
-    func setBaseUrl(_ url: String) {
-        set(.baseUrl, url)
-    }
-}

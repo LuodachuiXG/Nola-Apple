@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// API 接口报错异常
 struct ApiError: Error, Codable {
     let message: String
 }

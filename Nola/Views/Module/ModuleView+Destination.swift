@@ -14,7 +14,7 @@ extension ModuleView {
     var destButtons: [ModuleNavData] {
         [
             ModuleNavData(
-                title: "文章", icon: "book", destination: DetailView(title: "文章"),
+                title: "文章", icon: "book", destination: PostView(),
                 count: contentVM.blogOverview?.count.post
             ),
             ModuleNavData(

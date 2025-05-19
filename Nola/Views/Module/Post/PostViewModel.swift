@@ -18,7 +18,9 @@ final class PostViewModel: ObservableObject {
     func getPosts(
         failure: @escaping (String) -> Void = { _ in }
     ) {
-        isLoading = true
+        withAnimation {
+            isLoading = true
+        }
         Task {
             do {
                 let pager = try await PostService.getPosts(page: 1, size: 20).data
@@ -27,12 +29,12 @@ final class PostViewModel: ObservableObject {
                         posts = ps
                     }
                 }
-                isLoading = false
             } catch let err as ApiError {
                 failure(err.message)
-                isLoading = false
             } catch {
                 failure(error.localizedDescription)
+            }
+            withAnimation {
                 isLoading = false
             }
         }

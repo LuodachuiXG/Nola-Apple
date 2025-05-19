@@ -20,15 +20,25 @@ struct PostView: View {
     @State private var errorMessage = ""
     
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
-                ForEach(vm.posts, id: \.postId) { post in
-                    PostCard(post: post) {
-                        print(post.title)
+        ZStack {
+            if vm.isLoading {
+                ProgressView()
+            } else {
+                // 文章列表
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
+                        ForEach(vm.posts, id: \.postId) { post in
+                            NavigationLink {
+                                PostDetailView(post: post)
+                            } label: {
+                                PostCard(post: post)
+                                    .tint(.primary)
+                            }
+                        }
                     }
+                    .padding(.defaultSpacing)
                 }
             }
-            .padding(.defaultSpacing)
         }
         .navigationTitle("文章")
         .messageAlert(isPresented: $showErrorAlert, message: LocalizedStringKey(errorMessage))
@@ -38,9 +48,12 @@ struct PostView: View {
                 showErrorAlert = true
             }
         }
+        
     }
 }
 
 #Preview {
-    PostView()
+    NavigationStack {
+        PostView()
+    }
 }

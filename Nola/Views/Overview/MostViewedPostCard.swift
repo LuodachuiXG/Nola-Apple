@@ -92,7 +92,6 @@ struct MostViewedPostCard: View {
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
         .shadow(radius: postCover == nil ? 0 : .defaultShadowRadius)
-        .transition(.scale)
         .onTapGesture {
             feedbackGenerator.impactOccurred()
         }

@@ -16,11 +16,11 @@ struct CategoryCard: View {
     
     var body: some View {
         HStack {
-            Image(systemName: "books.vertical")
+            Image(symbol: .category)
             Text("\(category.displayName) （\(category.postCount)）")
                 .lineLimit(1)
             Spacer()
-            Image(systemName: "chevron.right")
+            Image(symbol: .clickableArrowRight)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 6)

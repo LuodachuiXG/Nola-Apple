@@ -14,35 +14,51 @@ extension ModuleView {
     var destButtons: [ModuleNavData] {
         [
             ModuleNavData(
-                title: "文章", icon: "book", destination: PostView(),
+                title: "文章",
+                icon: SFSymbol.post.rawValue,
+                destination: PostView(),
                 count: contentVM.blogOverview?.count.post
             ),
             ModuleNavData(
-                title: "标签", icon: "tag", destination: DetailView(title: "标签"),
+                title: "标签",
+                icon: SFSymbol.tag.rawValue,
+                destination: DetailView(title: "标签"),
                 count: contentVM.blogOverview?.count.tag
             ),
             ModuleNavData(
-                title: "分类", icon: "books.vertical",  destination: DetailView(title: "分类"),
+                title: "分类",
+                icon: SFSymbol.category.rawValue,
+                destination: DetailView(title: "分类"),
                 count: contentVM.blogOverview?.count.category
             ),
             ModuleNavData(
-                title: "评论", icon: "message", destination: DetailView(title: "评论"),
+                title: "评论",
+                icon: SFSymbol.comment.rawValue,
+                destination: DetailView(title: "评论"),
                 count: contentVM.blogOverview?.count.comment
             ),
             ModuleNavData(
-                title: "日常", icon: "leaf", destination: DetailView(title: "日常"),
+                title: "日常",
+                icon: SFSymbol.diary.rawValue,
+                destination: DetailView(title: "日常"),
                 count: contentVM.blogOverview?.count.diary
             ),
             ModuleNavData(
-                title: "附件", icon: "tray.full", destination: DetailView(title: "附件"),
+                title: "附件",
+                icon: SFSymbol.file.rawValue,
+                destination: DetailView(title: "附件"),
                 count: contentVM.blogOverview?.count.file
             ),
             ModuleNavData(
-                title: "链接", icon: "at", destination: DetailView(title: "链接"),
+                title: "链接",
+                icon: SFSymbol.link.rawValue,
+                destination: DetailView(title: "链接"),
                 count: contentVM.blogOverview?.count.link
             ),
             ModuleNavData(
-                title: "菜单", icon: "line.3.horizontal", destination: DetailView(title: "菜单"),
+                title: "菜单",
+                icon: SFSymbol.menu.rawValue,
+                destination: DetailView(title: "菜单"),
                 count: contentVM.blogOverview?.count.menu
             )
         ]

@@ -8,7 +8,7 @@
 import Foundation
 
 /// 文章状态枚举
-enum PostStatus: String, Codable {
+enum PostStatus: String, Codable, Equatable {
     /// 已发布
     case PUBLISHED
     /// 草稿

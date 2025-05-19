@@ -8,7 +8,7 @@
 import Foundation
 
 /// 文章实体类
-struct Post: Codable {
+struct Post: Codable, Equatable {
     /// 文章 ID
     let postId: Int
     /// 文章标题

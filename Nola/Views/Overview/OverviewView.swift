@@ -18,31 +18,31 @@ struct OverviewView: View {
         GridItem(.flexible(), spacing: 10)
     ]
     
-    // 文章最多的 5 个分类
+    // 文章最多的 6 个分类
     var categories: [BlogOverviewCategory] {
         guard let cs = contentVM.blogOverview?.categories else {
             return []
         }
         
-        // 取文章数量最多的 5 个分类
+        // 取文章数量最多的 6 个分类
         return Array(
             cs.sorted { a, b in
                 return a.postCount > b.postCount
-            }[0..<min(5, cs.count)]
+            }[0..<min(6, cs.count)]
         )
     }
     
-    // 文章最多的 5 个标签
+    // 文章最多的 6 个标签
     var tags: [BlogOverviewTag] {
         guard let ts = contentVM.blogOverview?.tags else {
             return []
         }
         
-        // 取文章数量最多的 5 个标签
+        // 取文章数量最多的 6 个标签
         return Array(
             ts.sorted { a, b in
                 return a.postCount > b.postCount
-            }[0..<min(5, ts.count)]
+            }[0..<min(6, ts.count)]
         )
     }
     
@@ -75,9 +75,9 @@ struct OverviewView: View {
                             ).aspectRatio(1, contentMode: .fill)
                         }
                         
-                        // 文章最多的 5 个分类
+                        // 文章最多的 6 个分类
                         if !categories.isEmpty {
-                            OverviewTitle(title: "文章最多的 \(min(5, categories.count)) 个分类")
+                            OverviewTitle(title: "文章最多的 \(min(6, categories.count)) 个分类")
                             LazyVGrid(columns: gridCols, alignment: .leading, spacing: .defaultSpacing) {
                                 ForEach(
                                     categories,
@@ -88,9 +88,9 @@ struct OverviewView: View {
                             }
                         }
                         
-                        // 文章最多的 5 个标签
+                        // 文章最多的 6 个标签
                         if !tags.isEmpty {
-                            OverviewTitle(title: "文章最多的 \(min(5, categories.count)) 个标签")
+                            OverviewTitle(title: "文章最多的 \(min(6, categories.count)) 个标签")
                             LazyVGrid(columns: gridCols, alignment: .leading, spacing: .defaultSpacing) {
                                 ForEach(
                                     tags,

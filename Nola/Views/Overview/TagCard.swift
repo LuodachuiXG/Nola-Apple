@@ -16,11 +16,11 @@ struct TagCard: View {
     
     var body: some View {
         HStack {
-            Image(systemName: "tag")
+            Image(symbol: .tag)
             Text("\(tag.displayName) （\(tag.postCount)）")
                 .lineLimit(1)
             Spacer()
-            Image(systemName: "chevron.right")
+            Image(symbol: .clickableArrowRight)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 6)

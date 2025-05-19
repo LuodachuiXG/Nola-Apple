@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 @MainActor
 final class PostViewModel: ObservableObject {
@@ -22,16 +23,16 @@ final class PostViewModel: ObservableObject {
             do {
                 let pager = try await PostService.getPosts(page: 1, size: 20).data
                 if let ps = pager?.data {
-                    posts = ps
+                    withAnimation {
+                        posts = ps
+                    }
                 }
                 isLoading = false
             } catch let err as ApiError {
                 failure(err.message)
-                print("APIERROR: \(err.message)")
                 isLoading = false
             } catch {
                 failure(error.localizedDescription)
-                print("IOSERROR: \(error.localizedDescription)")
                 isLoading = false
             }
         }

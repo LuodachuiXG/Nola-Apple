@@ -8,7 +8,7 @@
 import Foundation
 
 /// 分类实体类
-struct Category: Codable {
+struct Category: Codable, Equatable {
     /// 分类 ID
     let categoryId: Int
     /// 分类名

@@ -23,7 +23,9 @@ struct PostView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
                 ForEach(vm.posts, id: \.postId) { post in
-                    PostCard(post: post)
+                    PostCard(post: post) {
+                        print(post.title)
+                    }
                 }
             }
             .padding(.defaultSpacing)

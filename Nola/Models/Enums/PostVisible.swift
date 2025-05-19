@@ -8,7 +8,7 @@
 import Foundation
 
 /// 文章可见性枚举
-enum PostVisible: String, Codable {
+enum PostVisible: String, Codable, Equatable {
     case VISIBLE
     case HIDDEN
 }

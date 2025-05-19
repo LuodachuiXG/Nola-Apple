@@ -126,9 +126,9 @@ private struct ControllerPanelView: View {
         
         var group = [
             UserControllerGroup(name: "BLOG", items: [
-                UserControllerItem(icon: "person.circle", name: "管理员信息", destination: AdminInfoView()),
-                UserControllerItem(icon: "gear.circle", name: "博客设置", destination: BlogSettingView()),
-                UserControllerItem(icon: "arrow.clockwise.circle", name: "博客备份", destination: BlogBackupView())
+                UserControllerItem(icon: SFSymbol.adminCircle.rawValue, name: "管理员信息", destination: AdminInfoView()),
+                UserControllerItem(icon: SFSymbol.settingCircle.rawValue, name: "博客设置", destination: BlogSettingView()),
+                UserControllerItem(icon: SFSymbol.backupCircle.rawValue, name: "博客备份", destination: BlogBackupView())
             ])
         ]
         
@@ -214,7 +214,7 @@ private struct ControllerPanelView: View {
                         .symbolEffect(.rotate.byLayer, options: .speed(3).nonRepeating)
                     Text(item.name)
                     Spacer()
-                    Image(systemName: "chevron.right")
+                    Image(symbol: .clickableArrowRight)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 6)

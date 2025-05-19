@@ -13,44 +13,37 @@ struct PostCard: View {
     
     let post: Post
     
-    // 文章封面
-    var cover: String? {
-        if let cover = post.cover {
-            return cover
-        }
-        
-        if let category = post.category, let cover = category.cover, category.unifiedCover {
-            // 当前文章的分类设置了统一封面
-            return cover
-        }
-        
-        return nil
-    }
+    let click: () -> Void
     
+    init(post: Post, click: @escaping () -> Void = {}) {
+        self.post = post
+        self.click = click
+    }
+
     var body: some View {
-        Card {
-            VStack {
-                if let cover {
-                    AsyncImage(url: URL(string: cover)) { img in
-                        img
-                            .resizable()
-                            .scaledToFill()
-                    } placeholder: {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    }
-                    .frame(maxHeight: 180)
-                    .clipped()
+        Button {
+            click()
+        } label: {
+            Card {
+                LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
+                    // 标题
+                    Text(post.title)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1)
+                        .font(.title3.weight(.semibold))
+                    
+                    // 摘要
+                    Text(post.excerpt)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(2)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.leading)
+                    
                 }
-                
-                Text(post.title)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .font(.title3.weight(.semibold))
-                    .padding(.defaultSpacing)
-                    .padding(.bottom, .defaultSpacing / 2)
+                .padding(.defaultSpacing)
             }
         }
-        
+        .tint(.primary)
     }
 }

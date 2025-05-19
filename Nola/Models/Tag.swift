@@ -8,7 +8,7 @@
 import Foundation
 
 /// 标签实体类
-struct Tag: Codable {
+struct Tag: Codable, Equatable {
     /// 标签 ID
     let tagId: Int
     /// 标签名

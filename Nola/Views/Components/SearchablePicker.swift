@@ -40,7 +40,7 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
     private var labelKeyPath: KeyPath<Item, Label>
     
     // 已选择的项
-    @State private var selected: Set<Item> = []
+    @State private var selected: Set<Item.ID> = []
     
     // 是否允许多选
     private var allowMultiple = false
@@ -50,7 +50,7 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
     
     /// 初始化 SearchablePicker
     /// - Parameters:
-    ///   - items: 选项数组
+    ///   - items: 选项数组（Item 需要实现 Identifiable, Hashable 协议）
     ///   - labelKeyPath: 标签 KeyPath（用于设置选项的标题）
     ///   - selected: 已选项
     ///   - allowMultiple: 是否允许多选（默认 false，单选）
@@ -66,7 +66,7 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
     ) {
         self._items = items
         self.labelKeyPath = labelKeyPath
-        self.selected = Set(selected)
+        self.selected = Set(selected.map { $0.id })
         self.allowMultiple = allowMultiple
         self.title = title ?? "选择"
         self.onConfirm = onConfirm
@@ -78,14 +78,14 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
                 Button {
                     if allowMultiple {
                         // 允许多选，添加当前项到已选择列表或从已选择列表中删除
-                        if selected.contains(item) {
-                            selected.remove(item)
+                        if selected.contains(item.id) {
+                            selected.remove(item.id)
                         } else {
-                            selected.insert(item)
+                            selected.insert(item.id)
                         }
                     } else {
                         // 不允许多选，直接返回结果
-                        onConfirm([item])
+                        onConfirm(getItemsById(ids: [item.id]))
                         dismiss()
                     }
                 } label: {
@@ -96,8 +96,8 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
                             .foregroundStyle(.foreground)
                         Spacer()
                         
-                        if selected.contains(item) {
-                            Image(systemName: "checkmark")
+                        if selected.contains(item.id) {
+                            Image(symbol: .check)
                         }
                     }
                 }
@@ -108,7 +108,7 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
             if allowMultiple {
                 // 允许多选，显示完成按钮
                 Button("完成") {
-                    onConfirm(Array(selected))
+                    onConfirm(getItemsById(ids: Array(selected)))
                     dismiss()
                 }
             }
@@ -116,6 +116,18 @@ struct SearchablePicker<Item: Identifiable & Hashable, Label: Hashable>: View {
         .searchable(text: $searchValue, prompt: "搜索")
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    
+    /// 根据 [Item.ID] 从 items 中获取对应的 [Item]
+    private func getItemsById(ids: [Item.ID]) -> [Item] {
+        var ret = [Item]()
+        _items.forEach { i in
+            if ids.contains(i.id) {
+                ret.append(i)
+            }
+        }
+        return ret
     }
 }
 

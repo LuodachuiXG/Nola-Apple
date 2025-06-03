@@ -41,4 +41,30 @@ extension String {
         
         return true
     }
+    
+    
+    /// 将文本转换为拼音
+    func toPinyin() -> String {
+        // 转换为拼音
+        let mutableString = NSMutableString(string: self) as CFMutableString
+        CFStringTransform(mutableString, nil, kCFStringTransformMandarinLatin, false)
+        CFStringTransform(mutableString, nil, kCFStringTransformStripDiacritics, false)
+        let pinyin = String(mutableString)
+        
+        // 过滤并替换特殊字符
+        var result = ""
+        var lastCharWasDash = false
+        
+        for char in pinyin.lowercased() {
+            if char.isLetter || char.isNumber {
+                result.append(char)
+                lastCharWasDash = false
+            } else if !lastCharWasDash {
+                result.append("-")
+                lastCharWasDash = true
+            }
+        }
+        
+        return result.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+    }
 }

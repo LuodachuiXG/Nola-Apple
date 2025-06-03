@@ -16,13 +16,26 @@ struct PostDetailView: View {
     @State var post: Post
     
     @ObservedObject private var vm: PostViewModel
-
+    
     @State private var showErrorAlert = false
     @State private var errorAlertMsg = ""
     
-    // 文章分类别名和标签
-    @State private var category: String?
+    // 当前文章的分类和标签
+    @State private var category: Category?
     @State private var tags: [Tag]
+    private var tagsItemLabel: String {
+        // 标签选项 Label，根据当前的标签数量动态改变
+        get {
+            if tags.isEmpty {
+                return ""
+            } else if tags.count == 1 {
+                return tags.first!.displayName
+            } else {
+                // 大于 1
+                return "\(tags.count) 个标签"
+            }
+        }
+    }
     
     // 文章分类和标签搜索值
     @State private var categorySearch = ""
@@ -45,7 +58,7 @@ struct PostDetailView: View {
     init(post: Post, viewModel: PostViewModel) {
         self.post = post
         self.vm = viewModel
-        self.category = post.category?.slug
+        self.category = post.category
         self.tags = post.tags
         originalTitle = post.title
     }
@@ -53,7 +66,6 @@ struct PostDetailView: View {
     var body: some View {
         List {
             Section("基本信息") {
-                
                 OptionItem(label: "标题") {
                     TextField(text: $post.title) {
                         Text("文章标题")
@@ -67,14 +79,15 @@ struct PostDetailView: View {
                     }
                     .textInputAutocapitalization(.never)
                 }
+                .contextMenu {
+                    Button("自动生成别名", systemImage: SFSymbol.quote.rawValue) {
+                        post.slug = post.title.toPinyin()
+                    }
+                }
                 
                 OptionItem(label: "摘要") {
                     NavigationLink {
-                        List {
-                            TextEditor(text: $post.excerpt)
-                                .frame(minHeight: 240)
-                        }
-                        .navigationTitle("摘要")
+                        ExcerptView(post: $post)
                     } label: {
                         HStack {
                             Spacer()
@@ -86,29 +99,76 @@ struct PostDetailView: View {
                 }
                 
                 // 分类选择
-                Picker("分类", selection: $category) {
-                    ForEach(vm.categories, id: \.categoryId) { c in
-                        Text(c.displayName).tag(c.slug)
+                OptionItem(label: "分类") {
+                    NavigationLink {
+                        SearchablePicker(
+                            items: vm.categories,
+                            labelKeyPath: \.displayName,
+                            selected: category == nil ? [] : [category!],
+                            title: "选择分类"
+                        ) { ret in
+                            category = ret.first!
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text(category?.displayName ?? "")
+                                .lineLimit(1)
+                                .foregroundStyle(Color.secondary)
+                        }
                     }
                 }
-                .pickerStyle(.navigationLink)
                 
                 // 标签选择
-                Picker(selection: .constant("Java")) {
-                    Text("Java").tag("Java")
-                    Text("Kotlin").tag("Kotlin")
-                    Text("Swift").tag("Swift")
-                } label: {
-                    Text("标签")
+                OptionItem(label: "标签") {
+                    NavigationLink {
+                        SearchablePicker(
+                            items: vm.tags,
+                            labelKeyPath: \.displayName,
+                            selected: tags,
+                            allowMultiple: true,
+                            title: "选择标签"
+                        ) { ret in
+                            tags = ret
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text(tagsItemLabel)
+                                .lineLimit(1)
+                                .foregroundStyle(Color.secondary)
+                        }
+                    }
                 }
-                .pickerStyle(.navigationLink)
-                
+            }
+            
+            Section("文章状态") {
                 Toggle(isOn: $post.allowComment) {
                     Text("允许评论")
                 }
                 
                 Toggle(isOn: $post.pinned) {
                     Text("置顶")
+                }
+                
+                // 文章状态
+                Picker(selection: $post.status) {
+                    Text("已发布")
+                        .tag(PostStatus.PUBLISHED)
+                    Text("草稿")
+                        .tag(PostStatus.DRAFT)
+                } label: {
+                    Text("状态")
+                }
+                
+                // 文章可见性
+                Picker(selection: $post.visible) {
+                    Text("可见")
+                        .tag(PostVisible.VISIBLE)
+                    Text("隐藏")
+                        .tag(PostVisible.HIDDEN)
+                } label: {
+                    Text("可见性")
                 }
             }
             
@@ -148,6 +208,47 @@ struct PostDetailView: View {
             }
         }
         .navigationTitle(originalTitle)
+    }
+}
+
+
+/// 摘要编辑页面
+private struct ExcerptView: View {
+    
+    @Binding var post: Post
+    
+    var body: some View {
+        List {
+            Section("保存后自动根据文章内容生成摘要") {
+                Toggle(
+                    isOn: Binding(
+                        get: {
+                            post.autoGenerateExcerpt
+                        },
+                        set: { newValue in
+                            withAnimation {
+                                post.autoGenerateExcerpt = newValue
+                            }
+                        }
+                    )
+                ) {
+                    Text("自动生成摘要")
+                }
+            }
+            
+            if !post.autoGenerateExcerpt {
+                Section("摘要内容") {
+                    ZStack {
+                        TextEditor(text: $post.excerpt)
+                            .frame(minHeight: 240)
+                            .disabled(post.autoGenerateExcerpt)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .padding(.defaultSpacing)
+                }
+            }
+        }
+        .navigationTitle("摘要")
     }
 }
 

@@ -36,4 +36,19 @@ enum SFSymbol: String {
     
     /// 可点击右箭头
     case clickableArrowRight = "chevron.right"
+    
+    /// 对勾
+    case check = "checkmark"
+    
+    /// 引用
+    case quote = "text.quote"
+    
+    /// 锁
+    case lock = "lock.fill"
+    
+    /// 隐藏
+    case hidden = "eye.slash"
+    
+    /// 置顶
+    case pinned = "pin.fill"
 }

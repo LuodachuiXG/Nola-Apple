@@ -13,10 +13,13 @@ struct PostDetailView: View {
     
     @Environment(\.dismiss) var dismiss
     
+    // 当前查看的文章
     @State var post: Post
     
+    // 文章 ViewModel
     @ObservedObject private var vm: PostViewModel
     
+    // 错误弹窗
     @State private var showErrorAlert = false
     @State private var errorAlertMsg = ""
     
@@ -41,7 +44,7 @@ struct PostDetailView: View {
     @State private var categorySearch = ""
     @State private var tagSearch = ""
     
-    // 文章原标题
+    // 文章原标题（防止修改文章标题时，因为 post 状态改变而导致 navigation title 改变）
     private let originalTitle: String
     
     // 文章摘要
@@ -54,6 +57,41 @@ struct PostDetailView: View {
         }
     }
     
+    
+    // 文章是否加密
+    // true 为加密，需要设置提供新密码，
+    // false 为删除旧密码，
+    // nil 为保持当前不变
+    @State private var isEncrypted: Bool? = nil
+    // 文章新密码，当 isEncrypted 为 true 时需要
+    @State private var newPassword: String? = nil
+    
+    // 当前文章是否加密描述
+    private var postEncryptedDescription: String {
+        
+        if let np = newPassword, !np.isEmpty {
+            // 设置了新密码
+            if post.encrypted {
+                // 当前文章已经是加密状态
+                return "保存后修改密码"
+            } else {
+                // 当前文章是未加密状态
+                return "保存后设置密码"
+            }
+        }
+        
+        
+        if isEncrypted == true {
+            return "已加密"
+        } else if isEncrypted == false {
+            // isEncrypted 默认是 nil，如果被设置为了 false，
+            // 证明当前文章已经是加密状态（因为只有当前文章已经是加密状态时，才可以修改 isEncrypted），然后用户选择了清除密码。
+            return "保存后清除密码"
+        } else {
+            // isEncrypted 为 nil，保持当前文章现状
+            return post.encrypted ? "已加密" : "未加密"
+        }
+    }
     
     init(post: Post, viewModel: PostViewModel) {
         self.post = post
@@ -186,6 +224,33 @@ struct PostDetailView: View {
                     Text(String(post.createTime.formatMillisToDateStr()))
                 }
             }
+            
+            Section("密码") {
+                OptionItem(label: "文章密码") {
+                    NavigationLink {
+                        PasswordView(post: post, isEncrypted: $isEncrypted, newPassword: $newPassword)
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text(postEncryptedDescription)
+                                .foregroundStyle(Color.secondary)
+                        }
+                    }
+                }
+            }
+            
+            Section {
+                Button("编辑") {
+                    
+                }
+            }
+            
+            Section {
+                Button("加入回收站", role: .destructive) {
+                    
+                }
+            }
+            
         }
         .task {
             if vm.categories.isEmpty {
@@ -249,6 +314,62 @@ private struct ExcerptView: View {
             }
         }
         .navigationTitle("摘要")
+    }
+}
+
+
+/// 文章加密设置页面
+private struct PasswordView: View {
+    
+    var post: Post
+    
+    // 文章是否加密
+    // true 为加密，需要设置提供新密码，
+    // false 为删除旧密码，
+    // nil 为保持当前不变
+    @Binding var isEncrypted: Bool?
+    // 文章新密码，当 isEncrypted 为 true 时需要
+    @Binding var newPassword: String?
+    
+    var body: some View {
+        List {
+            
+            if post.encrypted {
+                // 文章当前已经是加密状态（Toggle 仅在当前文章已经是加密的状态时才会显示，用于清除加密）
+                Section(isEncrypted == false ? "保存后文章密码会被清除" : "文章加密状态") {
+                    Toggle(
+                        "文章加密",
+                        isOn: Binding(
+                            get: {
+                                return isEncrypted == nil || isEncrypted!
+                            }, set: { newValue in
+                                withAnimation {
+                                    isEncrypted = newValue
+                                }
+                            }
+                        )
+                    )
+                }
+            }
+            
+            
+            if isEncrypted != false {
+                // isEncrypted 被设为了 false，证明当前文章状态是已加密，然后又取消加密，所以隐藏密码框
+                Section("文章密码") {
+                    SecureField(
+                        text: Binding(
+                            get: {
+                                return newPassword ?? ""
+                            }, set: { newValue in
+                                newPassword = newValue
+                            }
+                        ),
+                        prompt: Text(post.encrypted ? "文章已设置密码，输入设置新密码" : "输入密码")
+                    ) {}
+                }
+            }
+        }
+        .navigationTitle("文章密码")
     }
 }
 

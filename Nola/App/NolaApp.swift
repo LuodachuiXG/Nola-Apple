@@ -18,7 +18,6 @@ struct NolaApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .fontDesign(.rounded)
                 .environmentObject(authManager)
                 .environment(\.storeManager, StoreManager.shared)
                 .environment(\.keychain, KeychainManager.shared)

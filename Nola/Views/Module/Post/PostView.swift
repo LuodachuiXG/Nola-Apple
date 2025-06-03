@@ -19,36 +19,50 @@ struct PostView: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     
+    // 标记是否已经刷新过了，防止从子页面回来重复刷新
+    @State var firstRefresh = false
+    
     var body: some View {
         ZStack {
-            if vm.isLoading {
+            if !firstRefresh {
                 ProgressView()
-            } else {
-                // 文章列表
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
-                        ForEach(vm.posts, id: \.postId) { post in
-                            NavigationLink {
-                                PostDetailView(post: post)
-                            } label: {
-                                PostCard(post: post)
-                                    .tint(.primary)
-                            }
+            }
+            
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
+                    ForEach(vm.posts, id: \.postId) { post in
+                        NavigationLink {
+                            PostDetailView(post: post)
+                        } label: {
+                            PostCard(post: post)
+                                .tint(.primary)
                         }
                     }
-                    .padding(.defaultSpacing)
                 }
+                .padding(.defaultSpacing)
+            }
+            .refreshable {
+                await refreshPost()
             }
         }
         .navigationTitle("文章")
+        .toolbarTitleDisplayMode(.inline)
         .messageAlert(isPresented: $showErrorAlert, message: LocalizedStringKey(errorMessage))
         .task {
-            vm.getPosts { err in
-                errorMessage = err
-                showErrorAlert = true
+            if !firstRefresh {
+                await refreshPost()
             }
         }
         
+    }
+    
+    /// 刷新文章
+    private func refreshPost() async {
+        if let err = await vm.getPosts() {
+            errorMessage = err
+            showErrorAlert = true
+        }
+        firstRefresh = true
     }
 }
 

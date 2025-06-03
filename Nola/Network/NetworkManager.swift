@@ -45,10 +45,17 @@ class NetworkManager {
         store.setBaseUrl(baseUrl!)
     }
     
+    /// 发起请求
+    /// - Parameters:
+    ///   - endpoint: 地址
+    ///   - method: 请求方式
+    ///   - parameters: 请求体
+    ///   - array: 数组请求体，用于给一些只需要数组作为参数的接口使用。同时填写时 parameters 优先级更高
     func request<T: Codable>(
         endpoint: String,
         method: HttpMethod,
-        parameters: [String: Any?]? = nil
+        parameters: [String: Any?]? = nil,
+        array: [Any?]? = nil
     ) async throws -> ApiResponse<T>  {
         
         guard let base = baseUrl else {
@@ -71,6 +78,8 @@ class NetworkManager {
         
         if let parameters = parameters {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } else if let array = array {
+            request.httpBody = try JSONSerialization.data(withJSONObject: array)
         }
         
         let config = URLSessionConfiguration.default

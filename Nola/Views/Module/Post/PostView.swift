@@ -32,7 +32,7 @@ struct PostView: View {
                 LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
                     ForEach(vm.posts, id: \.postId) { post in
                         NavigationLink {
-                            PostDetailView(post: post)
+                            PostDetailView(post: post, viewModel: vm)
                         } label: {
                             PostCard(post: post)
                                 .tint(.primary)

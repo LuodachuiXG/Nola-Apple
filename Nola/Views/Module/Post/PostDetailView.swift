@@ -15,7 +15,20 @@ struct PostDetailView: View {
     
     @State var post: Post
     
+    @ObservedObject private var vm: PostViewModel
+
+    @State private var showErrorAlert = false
+    @State private var errorAlertMsg = ""
     
+    // 文章分类别名和标签
+    @State private var category: String?
+    @State private var tags: [Tag]
+    
+    // 文章分类和标签搜索值
+    @State private var categorySearch = ""
+    @State private var tagSearch = ""
+    
+    // 文章原标题
     private let originalTitle: String
     
     // 文章摘要
@@ -29,8 +42,11 @@ struct PostDetailView: View {
     }
     
     
-    init(post: Post) {
+    init(post: Post, viewModel: PostViewModel) {
         self.post = post
+        self.vm = viewModel
+        self.category = post.category?.slug
+        self.tags = post.tags
         originalTitle = post.title
     }
     
@@ -67,19 +83,17 @@ struct PostDetailView: View {
                                 .foregroundStyle(Color.secondary)
                         }
                     }
-                    
-                    
                 }
                 
-                Picker(selection: .constant("Java")) {
-                    Text("Java").tag("Java")
-                    Text("Kotlin").tag("Kotlin")
-                    Text("Swift").tag("Swift")
-                } label: {
-                    Text("分类")
+                // 分类选择
+                Picker("分类", selection: $category) {
+                    ForEach(vm.categories, id: \.categoryId) { c in
+                        Text(c.displayName).tag(c.slug)
+                    }
                 }
                 .pickerStyle(.navigationLink)
                 
+                // 标签选择
                 Picker(selection: .constant("Java")) {
                     Text("Java").tag("Java")
                     Text("Kotlin").tag("Kotlin")
@@ -110,6 +124,21 @@ struct PostDetailView: View {
                 }
                 OptionItem(label: "创建时间") {
                     Text(String(post.createTime.formatMillisToDateStr()))
+                }
+            }
+        }
+        .task {
+            if vm.categories.isEmpty {
+                if let err = await vm.getCategories() {
+                    errorAlertMsg = err
+                    showErrorAlert = true
+                }
+            }
+            
+            if vm.tags.isEmpty {
+                if let err = await vm.getTags() {
+                    errorAlertMsg = err
+                    showErrorAlert = true
                 }
             }
         }

@@ -12,6 +12,8 @@ import SwiftUI
 final class PostViewModel: ObservableObject {
     
     @Published var posts: [Post] = []
+    @Published var categories: [Category] = []
+    @Published var tags: [Tag] = []
     
     /// 获取文章
     /// - returns: 返回失败信息（如果失败），成功返回 nil
@@ -31,4 +33,38 @@ final class PostViewModel: ObservableObject {
         
         return nil
     }
+    
+    
+    /// 获取分类
+    func getCategories() async -> String? {
+        do {
+            let pager = try await CategoryService.getCategories().data
+            if let data = pager?.data {
+                categories = data
+            }
+        } catch let err as ApiError {
+            return err.message
+        } catch {
+            return error.localizedDescription
+        }
+        
+        return nil
+    }
+    
+    /// 获取标签
+    func getTags() async -> String? {
+        do {
+            let pager = try await TagService.getTags().data
+            if let data = pager?.data {
+                tags = data
+            }
+        } catch let err as ApiError {
+            return err.message
+        } catch {
+            return error.localizedDescription
+        }
+        
+        return nil
+    }
+    
 }

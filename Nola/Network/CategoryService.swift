@@ -18,7 +18,7 @@ struct CategoryService {
         page: Int = 0,
         size: Int = 0
     ) async throws -> ApiResponse<Pager<[Category]>> {
-        var query = "?page=\(page)&size=\(size)"
+        let query = "?page=\(page)&size=\(size)"
         return try await NetworkManager.shared.request(
             endpoint: "/admin/category\(query)",
             method: .get

@@ -19,7 +19,7 @@ struct TagService {
         page: Int = 0,
         size: Int = 0
     ) async throws -> ApiResponse<Pager<[Tag]>> {
-        var query = "?page=\(page)&size=\(size)"
+        let query = "?page=\(page)&size=\(size)"
         return try await NetworkManager.shared.request(
             endpoint: "/admin/tag\(query)",
             method: .get

@@ -13,6 +13,9 @@ struct OverviewView: View {
     
     @ObservedObject var contentVM: ContentViewModel
     
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
     private let gridCols = [
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
@@ -131,6 +134,13 @@ struct OverviewView: View {
                         .padding(.top, .defaultSpacing * 10)
                     }
                 }.padding()
+            }
+            .messageAlert(isPresented: $showAlert, message: LocalizedStringKey(alertMessage))
+            .refreshable {
+                if let err = await contentVM.refreshOverview() {
+                    alertMessage = err
+                    showAlert = true
+                }
             }
             .navigationTitle(contentVM.blogOverview == nil ? "" : "概览")
             .navigationBarTitleDisplayMode(.inline)

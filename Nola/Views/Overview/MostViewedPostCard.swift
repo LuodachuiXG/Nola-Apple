@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import SDWebImageSwiftUI
+import UIKit
 
 /// 浏览最多的文章展示卡片
 struct MostViewedPostCard: View {

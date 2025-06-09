@@ -10,6 +10,9 @@ import SwiftUI
 struct ModuleView: View {
     
     @ObservedObject var contentVM: ContentViewModel
+    
+    @State private var showAlert = false
+    @State private var alertMsg = ""
 
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
     
@@ -30,9 +33,16 @@ struct ModuleView: View {
                 .padding()
 
             }
+            .refreshable {
+                if let err = await contentVM.refreshOverview() {
+                    showAlert = true
+                    alertMsg = err
+                }
+            }
             .navigationTitle("模块")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .messageAlert(isPresented: $showAlert, message: alertMsg)
         
     }
 }

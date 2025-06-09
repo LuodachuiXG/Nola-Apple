@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import UIKit
 
 /// 文章 View
 struct PostView: View {
@@ -32,7 +31,12 @@ struct PostView: View {
                 LazyVStack(alignment: .leading, spacing: .defaultSpacing) {
                     ForEach(vm.posts, id: \.postId) { post in
                         NavigationLink {
-                            PostDetailView(post: post, viewModel: vm)
+                            PostDetailView(post: post, viewModel: vm) {
+                                // 发生文章保存事件，刷新文章内容
+                                Task {
+                                    await refreshPost()
+                                }
+                            }
                         } label: {
                             PostCard(post: post)
                                 .tint(.primary)

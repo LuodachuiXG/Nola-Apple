@@ -50,10 +50,14 @@ extension Post {
     
     /// 文章的实际封面，如果文章本身有封面则返回本身的封面，否则返回分类的封面（分类设置了统一封面）
     var actualCover: String? {
+        // 获取服务器基地址，用于相对地址的图片
+        let store = StoreManager.shared
+        let baseUrl = store.getBaseUrl() ?? ""
+        
         if let cover = cover, !cover.isEmpty {
-            return cover
+            return cover.contains("http") ? cover : baseUrl + cover
         } else if let categoryCover = category?.cover, category?.unifiedCover == true && !categoryCover.isEmpty {
-            return categoryCover
+            return categoryCover.contains("http") ? categoryCover : baseUrl + categoryCover
         } else {
             return nil
         }

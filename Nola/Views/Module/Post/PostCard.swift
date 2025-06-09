@@ -98,6 +98,10 @@ private struct PostStatusIndicatorView: View {
         }
     }
     
+    // 标记当前动画是否已经启动，防止重复启动动画线程导致出现动画异常
+    @State private var isAnimateStart = false
+    
+    // 用于控制圆点动画
     @State private var isOn = true
     
     
@@ -107,13 +111,16 @@ private struct PostStatusIndicatorView: View {
                 .fill(isOn ? statusColor : statusColor.opacity(0))
                 .frame(width: isOn ? 10 : 20, height: isOn ? 10 : 20)
             
-            Circle()
-                .fill(statusColor)
-                .frame(width: 10, height: 10)
+//            Circle()
+//                .fill(statusColor)
+//                .frame(width: 10, height: 10)
         }.onAppear {
-            withAnimation(.easeInOut(duration: 1.5).delay(0.6).repeatForever(autoreverses: false)) {
-                isOn.toggle()
-            }
+//            if !isAnimateStart {
+//                withAnimation(.easeInOut(duration: 1.5).delay(0.6).repeatForever(autoreverses: false)) {
+//                    isOn.toggle()
+//                }
+//                isAnimateStart = true
+//            }
         }
         .frame(maxWidth: 10, maxHeight: 10)
     }

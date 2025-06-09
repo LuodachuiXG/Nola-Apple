@@ -51,4 +51,7 @@ enum SFSymbol: String {
     
     /// 置顶
     case pinned = "pin.fill"
+    
+    /// 保存
+    case save = "square.and.arrow.down"
 }

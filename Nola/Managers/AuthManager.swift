@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-
+ 
 /// 登录状态管理
 final class AuthManager: ObservableObject {
     static let shared = AuthManager()

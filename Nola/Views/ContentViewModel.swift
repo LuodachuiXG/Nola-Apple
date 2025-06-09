@@ -14,25 +14,24 @@ class ContentViewModel: ObservableObject {
     @Published var blogOverview: BlogOverview?
 
     /// 刷新博客概览数据
-    /// - Parameters:
-    ///   - onFailure: 失败回调
-    func refreshOverview(
-        onFailure: @escaping (String) -> Void = { _ in },
-    ) {
-        Task {
-            do {
-                let res = try await OverviewService.getBlogOverview()
-                if let data = res.data {
-                    withAnimation {
-                        blogOverview = data
-                    }
-                } else {
-                    onFailure("未知错误")
+    /// - Returns: 如果发生错误返回错误信息，成功返回 nil
+    func refreshOverview() async -> String? {
+        do {
+            let res = try await OverviewService.getBlogOverview()
+            if let data = res.data {
+                withAnimation {
+                    blogOverview = data
                 }
-            } catch {
-                onFailure(error.localizedDescription)
+            } else {
+                return "未知错误"
             }
+        } catch let err as ApiError {
+            return err.message
+        } catch {
+            return error.localizedDescription
         }
+        
+        return nil
     }
 
     /// 清除博客概览数据

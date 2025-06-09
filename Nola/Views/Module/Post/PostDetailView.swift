@@ -7,21 +7,24 @@
 
 import Foundation
 import SwiftUI
+import SDWebImageSwiftUI
 
 /// 文章详情 View
 struct PostDetailView: View {
     
     @Environment(\.dismiss) var dismiss
     
+    // 保存回调事件
+    private var onSavedCallback: () -> Void = {}
+    
+    // 标记当前文章数据是否改变，用于在 dismiss 时触发上面的 onSaved 方法
+    @State private var dataChange: Bool = false
+    
     // 当前查看的文章
     @State var post: Post
     
     // 文章 ViewModel
     @ObservedObject private var vm: PostViewModel
-    
-    // 错误弹窗
-    @State private var showErrorAlert = false
-    @State private var errorAlertMsg = ""
     
     // 当前文章的分类和标签
     @State private var category: Category?
@@ -66,6 +69,28 @@ struct PostDetailView: View {
     // 文章新密码，当 isEncrypted 为 true 时需要
     @State private var newPassword: String? = nil
     
+    
+    // MARK: - Dialog
+    // 错误弹窗
+    @State private var showErrorAlert = false
+    @State private var errorAlertMsg = ""
+    
+    // 显示将文章移入回收站弹窗
+    @State private var showRecycleAlert = false
+    
+    // 显示将文章移出回收站弹窗（恢复文章）
+    @State private var showRestoreAlert = false
+    
+    // 显示删除文章弹窗（彻底删除文章，只能删除处于 DELETE 状态的文章，即当前文章必须已经在回收站中）
+    @State private var showDeleteAlert = false
+    // 显示删除文章二次确认弹窗
+    @State private var showDeleteConfirmAlert = false
+    // MARK: - Dialog End
+    
+    
+    // 加载状态
+    @State private var isLoading = false
+    
     // 当前文章是否加密描述
     private var postEncryptedDescription: String {
         
@@ -93,16 +118,25 @@ struct PostDetailView: View {
         }
     }
     
-    init(post: Post, viewModel: PostViewModel) {
+    init(post: Post, viewModel: PostViewModel, onSaved: @escaping () -> Void) {
         self.post = post
         self.vm = viewModel
         self.category = post.category
         self.tags = post.tags
+        self.onSavedCallback = onSaved
         originalTitle = post.title
     }
     
     var body: some View {
         List {
+            if let cover = post.actualCover, let url = URL(string: cover) {
+                Section {
+                    ShareImageView(url: url)
+                }
+                .listRowInsets(EdgeInsets())
+                .shadow(radius: .defaultShadowRadius)
+            }
+            
             Section("基本信息") {
                 OptionItem(label: "标题") {
                     TextField(text: $post.title) {
@@ -189,14 +223,16 @@ struct PostDetailView: View {
                     Text("置顶")
                 }
                 
-                // 文章状态
-                Picker(selection: $post.status) {
-                    Text("已发布")
-                        .tag(PostStatus.PUBLISHED)
-                    Text("草稿")
-                        .tag(PostStatus.DRAFT)
-                } label: {
-                    Text("状态")
+                // 文章状态（文章在回收站时不显示）
+                if post.status != .DELETE {
+                    Picker(selection: $post.status) {
+                        Text("已发布")
+                            .tag(PostStatus.PUBLISHED)
+                        Text("草稿")
+                            .tag(PostStatus.DRAFT)
+                    } label: {
+                        Text("状态")
+                    }
                 }
                 
                 // 文章可见性
@@ -246,20 +282,59 @@ struct PostDetailView: View {
             }
             
             Section {
-                Button("加入回收站", role: .destructive) {
+                if post.status != .DELETE {
+                    Button("加入回收站", role: .destructive) {
+                        showRecycleAlert = true
+                    }
                     
+                    
+                } else {
+                    Button("移出回收站") {
+                        showRestoreAlert = true
+                    }
+                    .foregroundStyle(Color(cgColor: UIColor.systemGreen.cgColor))
+                    
+                    Button("彻底删除", role: .destructive) {
+                        showDeleteAlert = true
+                    }
                 }
             }
             
         }
+        // 回收文章弹窗
+        .confirmAlert(isPresented: $showRecycleAlert, message: "要将当前文章放入回收站吗") {
+            onRecyclePost()
+        }
+        // 恢复文章弹窗
+        .alert("确定将文章移出回收站吗", isPresented: $showRestoreAlert) {
+            Button("转为发布状态") {
+                onRestorePost(status: .PUBLISHED)
+            }
+            
+            Button("转为草稿状态") {
+                onRestorePost(status: .DRAFT)
+            }
+            
+            
+            Button("取消", role: .cancel) {}
+        }
+        // 删除文章弹窗
+        .confirmAlert(isPresented: $showDeleteAlert, message: "确定要永久删除当前文章吗") {
+            showDeleteConfirmAlert = true
+        }
+        // 删除文章二次确认弹窗
+        .confirmAlert(isPresented: $showDeleteConfirmAlert, message: "点击确定删除文章，此操作不可逆") {
+            onDeletePost()
+        }
         .task {
+            // 尝试获取所有分类
             if vm.categories.isEmpty {
                 if let err = await vm.getCategories() {
                     errorAlertMsg = err
                     showErrorAlert = true
                 }
             }
-            
+            // 尝试获取所有标签
             if vm.tags.isEmpty {
                 if let err = await vm.getTags() {
                     errorAlertMsg = err
@@ -269,10 +344,171 @@ struct PostDetailView: View {
         }
         .toolbar {
             Button("保存") {
-                dismiss()
+                onSave()
             }
         }
         .navigationTitle(originalTitle)
+    }
+    
+    /// 保存事件
+    private func onSave() {
+        isLoading = true
+        
+        var isEncrypt: Bool? {
+            if isEncrypted == false {
+                // 清除密码
+                return false
+            }
+            
+            if newPassword == nil || newPassword!.isEmpty {
+                // 没有设置新密码，保持当前状态不变
+                return nil
+            }
+            
+            if newPassword != nil && !newPassword!.isEmpty {
+                // 设置了新密码
+                return true
+            }
+            
+            return false
+        }
+        
+        Task {
+            if let err = await vm.updatePost(
+                postId: post.postId,
+                title: post.title,
+                autoGenerateExcerpt: post.autoGenerateExcerpt,
+                excerpt: post.excerpt,
+                slug: post.slug,
+                allowComment: post.allowComment,
+                status: post.status,
+                visible: post.visible,
+                categoryId: category?.id,
+                tagIds: tags.map { $0.id },
+                cover: post.cover,
+                pinned: post.pinned,
+                encrypted: isEncrypt,
+                password: newPassword
+            ) {
+                // 发生错误
+                errorAlertMsg = err
+                showErrorAlert = true
+            } else {
+                // 保存成功
+                onSavedCallback()
+                dismiss()
+            }
+            
+            isLoading = false
+        }
+    }
+    
+    /// 将文章放入回收站
+    private func onRecyclePost() {
+        isLoading = true
+        Task {
+            if let err = await vm.recyclePost(ids: [post.postId]) {
+                // 发生错误
+                errorAlertMsg = err
+                showErrorAlert = true
+            } else {
+                // 成功放入回收站
+                withAnimation {
+                    post.status = .DELETE
+                }
+                // 告知上一页文章数据发生改变
+                onSavedCallback()
+            }
+            
+            isLoading = false
+        }
+    }
+    
+    /// 将文章恢复
+    /// - Parameters:
+    ///   - status: 恢复文章状态（只能设为 DRAFT 或者 PUBLISHED）
+    private func onRestorePost(status: PostStatus) {
+        guard status != .DELETE else { return }
+        isLoading = true
+        Task {
+            if let err = await vm.restorePost(ids: [post.postId], status: status) {
+                // 发生错误
+                errorAlertMsg = err
+                showErrorAlert = true
+            } else {
+                // 恢复成功
+                withAnimation {
+                    post.status = status
+                }
+                // 告知上一页文章数据发生改变
+                onSavedCallback()
+            }
+            
+            isLoading = false
+        }
+    }
+    
+    /// 彻底删除文章，只能在文章处于 DELETE 状态时调用，即文章已经在回收站时。
+    private func onDeletePost() {
+        guard post.status == .DELETE else { return }
+    
+        isLoading = true
+        Task {
+            if let err = await vm.deletePost(ids: [post.postId]) {
+                // 发生错误
+                errorAlertMsg = err
+                showErrorAlert = true
+            } else {
+                // 删除成功
+                onSavedCallback()
+                dismiss()
+            }
+            isLoading = false
+        }
+    }
+}
+
+/// 文章图片组件
+private struct ShareImageView: View {
+    
+    let url: URL
+    
+    // 文章封面图片 Data，在加载完成后会赋值到此
+    @State private var coverImage: UIImage? = nil
+    
+    var body: some View {
+        AnimatedImage(url: url) {
+            VStack(alignment: .center) {
+                ProgressView()
+            }
+            .frame(maxWidth: .infinity)
+        }
+        
+        .resizable()
+        // 从网络读取成功
+        .onSuccess { image, data, cacheType in
+            if coverImage == nil, let data = data, let img = UIImage(data: data) {
+                coverImage = img
+            }
+        }
+        // 从本地缓存读取成功
+        .onViewUpdate(perform: { imageView, ctx in
+            if coverImage == nil, let uiImage = imageView.image {
+                coverImage = uiImage
+            }
+        })
+        .aspectRatio(contentMode: .fit)
+        .scaledToFit()
+        .contextMenu {
+            if let img = coverImage {
+                ShareLink(
+                    item: Image(uiImage: img),
+                    preview: SharePreview("文章图片分享", image: Image(uiImage: img))
+                ) {
+                    Label("分享/保存图片", systemImage: SFSymbol.save.rawValue)
+                }
+            }
+        }
     }
 }
 

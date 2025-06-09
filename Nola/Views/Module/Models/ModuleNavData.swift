@@ -10,7 +10,6 @@ import SwiftUI
 
 
 /// 模块页面导航实体类
-///
 /// - Parameters:
 ///   - id: ID.
 ///   - title: 导航名字.

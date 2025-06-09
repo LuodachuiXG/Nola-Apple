@@ -75,7 +75,7 @@ class NetworkManager {
         if let user = authManager.currentUser {
             request.setValue("Bearer \(user.token)", forHTTPHeaderField: "Authorization")
         }
-        
+
         if let parameters = parameters {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
         } else if let array = array {

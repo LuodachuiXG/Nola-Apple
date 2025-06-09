@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
 
     @EnvironmentObject private var authManager: AuthManager
@@ -49,9 +50,11 @@ struct ContentView: View {
 
     /// 刷新博客概览数据
     private func refreshOverview() {
-        vm.refreshOverview { err in
-            self.errorDialogMsg = err
-            self.showErrorDialog = true
+        Task {
+            if let err = await vm.refreshOverview() {
+                self.errorDialogMsg = err
+                self.showErrorDialog = true
+            }
         }
     }
 

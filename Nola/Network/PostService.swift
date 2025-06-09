@@ -55,4 +55,100 @@ struct PostService {
             method: .get
         )
     }
+    
+    /// 更新文章
+    /// - Parameters:
+    ///   - postId: 文章 ID
+    ///   - title: 文章标题
+    ///   - autoGenerateExcerpt: 是否自动生成摘要（默认 false）
+    ///   - excerpt: 文章摘要
+    ///   - slug: 文章别名
+    ///   - allowComment: 是否允许评论
+    ///   - status: 文章状态（不能设为 DELETE，DELETE 请调用专门的删除文章接口）
+    ///   - visible: 文章可见性
+    ///   - categoryId: 分类 ID
+    ///   - tagIds: 标签 ID 数组
+    ///   - cover: 文章封面
+    ///   - pinned: 是否置顶（默认 false）
+    ///   - encrypted: 文章是否加密（为 true 时需要提供 password，为 null 保持当前状态不变，为 false 删除密码）
+    ///   - password: 文章密码
+    static func updatePost(
+        postId: Int,
+        title: String,
+        autoGenerateExcerpt: Bool?,
+        excerpt: String?,
+        slug: String,
+        allowComment: Bool,
+        status: PostStatus,
+        visible: PostVisible,
+        categoryId: Int?,
+        tagIds: [Int]?,
+        cover: String?,
+        pinned: Bool?,
+        encrypted: Bool?,
+        password: String?
+    ) async throws -> ApiResponse<Bool> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post",
+            method: .put,
+            parameters: [
+                "postId": postId,
+                "title": title,
+                "autoGenerateExcerpt": autoGenerateExcerpt,
+                "excerpt": excerpt,
+                "slug": slug,
+                "allowComment": allowComment,
+                "status": status.rawValue,
+                "visible": visible.rawValue,
+                "categoryId": categoryId,
+                "tagIds": tagIds,
+                "cover": cover,
+                "pinned": pinned,
+                "encrypted": encrypted,
+                "password": password
+            ]
+        )
+    }
+    
+    /// 回收文章
+    /// - Parameters:
+    ///   - ids: 文章 ID 数组
+    static func recyclePost(
+        ids: [Int]
+    ) async throws -> ApiResponse<Bool> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post/recycle",
+            method: .put,
+            array: ids
+        )
+    }
+    
+    /// 恢复文章
+    /// - Parameters:
+    ///   - ids: 文章 ID 数组
+    ///   - status: 文章状态（不能为 DELETE）
+    static func restorePost(
+        ids: [Int],
+        status: PostStatus
+    ) async throws -> ApiResponse<Bool> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post/restore/\(status.rawValue)",
+            method: .put,
+            array: ids
+        )
+    }
+    
+    /// 彻底删除文章
+    /// 只能删除处于 DELETE 状态（回收站）的文章
+    /// - Parameters:
+    ///   - ids: 文章 ID 数组
+    static func deletePost(
+        ids: [Int],
+    ) async throws -> ApiResponse<Bool> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post",
+            method: .delete,
+            array: ids
+        )
+    }
 }

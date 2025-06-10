@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+            <title>文章预览</title>
+            <style>
+                body {
+                    font-family: -apple-system;
+                }
+                
+                @media (prefers-color-scheme: dark) {
+                    body {
+                        background-color: #1B1C20;
+                    }
+                }
+            </style>
+            <link rel="stylesheet" href="./highlight.min.css">
+                <script src="./highlight.min.js"></script>
+                <script src="./tailwind.js"></script>
+                <script src="./tailwind.forms.js"></script>
+    </head>
+    <body>
+        <div id="content" class="dark:bg-[#1B1C20] text-[4vw] p-10 max-w-full prose dark:prose-invert prose-pre:text-[4vw] prose-pre:shadow-2xl prose-pre:rounded-2xl prose-pre:p-0 prose-pre:m-0 prose-pre:mb-5 prose-table:inline-block prose-table:p-2 prose-table:shadow prose-table:border-1 prose-table:rounded prose-table:border-gray-200 dark:prose-table:border-gray-600 prose-table:overflow-x-auto"></div>
+        
+        <script src="./marked.min.js"></script>
+        
+        <script>
+            tailwind.config = {
+                darkMode: 'media',
+                theme: {
+                    extend: {},
+                }
+            }
+        </script>
+        
+        
+        <script>
+            window.onload = function() {
+                hljs.highlightAll();
+            }
+            
+            
+            window.renderMarkdown = function(markdownText) {
+                try {
+                    document.getElementById('content').innerHTML = marked.parse(markdownText);
+                    hljs.highlightAll();
+                } catch (e) {
+                    console.log(e);
+                    document.getElementById('content').innerHTML = "<p>Error rendering markdown.</p>";
+                }
+            };
+            
+            window.renderHTML = function(htmlText) {
+                document.getElementById('content').innerHTML = htmlText;
+            };
+        </script>
+    </body>
+</html>

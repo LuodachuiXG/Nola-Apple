@@ -184,4 +184,24 @@ final class PostViewModel: ObservableObject {
         return nil
     }
     
+    
+    /// 获取文章正文
+    /// 此接口只能用于获取文章已经发布的正文。
+    /// - Parameters:
+    ///   - id: 文章 ID
+    func getPostContent(
+        id: Int,
+    ) async -> (content: PostContent?, error: String?) {
+        do {
+            let ret = try await PostService.getPostContent(id: id)
+            if let postContent = ret.data {
+                return (postContent, nil)
+            }
+        } catch let err as ApiError {
+            return (nil, err.message)
+        } catch {
+            return (nil, error.localizedDescription)
+        }
+        return (nil, nil)
+    }
 }

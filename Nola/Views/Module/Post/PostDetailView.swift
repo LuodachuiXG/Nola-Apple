@@ -276,9 +276,13 @@ struct PostDetailView: View {
             }
             
             Section {
-                Button("编辑") {
-                    
+                NavigationLink {
+                    PostContentView(vm: vm, post: $post)
+                } label: {
+                    Text("编辑文章")
+                        .foregroundStyle(Color.blue)
                 }
+
             }
             
             Section {

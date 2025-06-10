@@ -151,4 +151,17 @@ struct PostService {
             array: ids
         )
     }
+    
+    /// 获取文章正文
+    /// 此接口只能用于获取文章已经发布的正文。
+    /// - Parameters:
+    ///   - id: 文章 ID
+    static func getPostContent(
+        id: Int,
+    ) async throws -> ApiResponse<PostContent> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post/publish/\(id)",
+            method: .get
+        )
+    }
 }

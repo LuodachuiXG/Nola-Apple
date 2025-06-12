@@ -54,4 +54,7 @@ enum SFSymbol: String {
     
     /// 保存
     case save = "square.and.arrow.down"
+    
+    /// 播放（预览文章）
+    case play = "play"
 }

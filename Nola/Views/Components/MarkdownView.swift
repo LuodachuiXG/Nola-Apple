@@ -9,9 +9,11 @@ import Foundation
 import SwiftUI
 import WebKit
 
+
+/// Markdown 渲染器
 struct MarkdownView: UIViewRepresentable {
     
-    let content: String
+    var content: String
     let isMarkdown: Bool
     
     func makeCoordinator() -> WebViewCoordinator {
@@ -33,7 +35,9 @@ struct MarkdownView: UIViewRepresentable {
         return webView
     }
     
-    func updateUIView(_ webView: WKWebView, context: Context) {}
+    func updateUIView(_ webView: WKWebView, context: Context) {
+//        injectContent(to: webView)
+    }
     
     /// 等到页面加载完成后渲染 Markdown 或 HTML
     func injectContent(to webView: WKWebView) {

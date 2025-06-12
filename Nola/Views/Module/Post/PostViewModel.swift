@@ -151,6 +151,7 @@ final class PostViewModel: ObservableObject {
     /// - Parameters:
     ///   - ids: 文章 ID 数组
     ///   - status: 文章状态（不能为 DELETE）
+    /// - returns: 返回失败信息（如果失败），成功返回 nil
     func restorePost(
         ids: [Int],
         status: PostStatus
@@ -171,6 +172,7 @@ final class PostViewModel: ObservableObject {
     /// 只能删除处于 DELETE 状态（回收站）的文章
     /// - Parameters:
     ///   - ids: 文章 ID 数组
+    /// - returns: 返回失败信息（如果失败），成功返回 nil
     func deletePost(
         ids: [Int],
     ) async -> String? {
@@ -189,6 +191,7 @@ final class PostViewModel: ObservableObject {
     /// 此接口只能用于获取文章已经发布的正文。
     /// - Parameters:
     ///   - id: 文章 ID
+    /// - returns: (文章内容, 错误信息）
     func getPostContent(
         id: Int,
     ) async -> (content: PostContent?, error: String?) {
@@ -203,5 +206,25 @@ final class PostViewModel: ObservableObject {
             return (nil, error.localizedDescription)
         }
         return (nil, nil)
+    }
+    
+    /// 保存文章内容
+    /// - Parameters:
+    ///   - id: 文章 ID
+    ///   - content: 文章内容（Markdown / PlainText）
+    /// - returns: 返回失败信息（如果失败），成功返回 nil
+    func updatePostContent(
+        id: Int,
+        content: String
+    ) async -> String? {
+        do {
+            let _ = try await PostService.updatePostContent(id: id, content: content)
+        } catch let err as ApiError {
+            return err.message
+        } catch {
+            return error.localizedDescription
+        }
+        
+        return nil
     }
 }

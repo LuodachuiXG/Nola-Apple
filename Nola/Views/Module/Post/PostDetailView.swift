@@ -277,6 +277,16 @@ struct PostDetailView: View {
             
             Section {
                 NavigationLink {
+                    PreviewPost(vm: vm, post: $post)
+                } label: {
+                    Text("查看文章")
+                        .foregroundStyle(Color.blue)
+                }
+
+            }
+            
+            Section("返回时自动保存文章内容") {
+                NavigationLink {
                     PostContentView(vm: vm, post: $post)
                 } label: {
                     Text("编辑文章")
@@ -469,6 +479,51 @@ struct PostDetailView: View {
             }
             isLoading = false
         }
+    }
+}
+
+
+/// 预览文章内容
+private struct PreviewPost: View {
+    
+    @ObservedObject var vm: PostViewModel
+    
+    @Binding var post: Post
+    
+    @State private var isLoading = false
+    
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
+    @State private var postContent: PostContent? = nil
+    
+    
+    var body: some View {
+        ZStack(alignment: .center) {
+            if isLoading {
+                ProgressView()
+            } else {
+                MarkdownView(content: postContent?.content ?? "", isMarkdown: true)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .task {
+            isLoading = true
+            let ret = await vm.getPostContent(id: post.postId)
+            if let err = ret.error {
+                alertMessage = err
+                showAlert = true
+            } else if let content = ret.content {
+                postContent = content
+            }
+      
+            withAnimation {
+                isLoading = false
+            }
+        }
+        .messageAlert(isPresented: $showAlert, message: alertMessage)
+        .navigationTitle(post.title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

@@ -164,4 +164,22 @@ struct PostService {
             method: .get
         )
     }
+    
+    /// 保存文章内容
+    /// - Parameters:
+    ///   - id: 文章 ID
+    ///   - content: 文章内容（Markdown / PlainText）
+    static func updatePostContent(
+        id: Int,
+        content: String
+    ) async throws -> ApiResponse<Bool> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post/publish",
+            method: .put,
+            parameters: [
+                "postId": id,
+                "content": content
+            ]
+        )
+    }
 }

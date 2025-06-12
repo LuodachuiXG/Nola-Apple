@@ -22,6 +22,9 @@ struct PostContentView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     
+    // 是否正在保存文章
+    @State private var isSaving = false
+    
     
     // 标记当前是否已经加载过，防止重复执行 task 导致文章刷新
     @State private var isLoaded = false
@@ -31,25 +34,31 @@ struct PostContentView: View {
             if isLoading {
                 ProgressView()
             } else {
-
+                TextEditor(
+                    text: Binding {
+                        return content?.content ?? ""
+                    } set: { newValue in
+                        content?.content = newValue
+                    }
+                )
+                .padding(5)
+                .frame(maxHeight: .infinity)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .messageAlert(isPresented: $showAlert, message: alertMessage)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    NavigationLink {
-                        
-                    } label: {
-                        Text("Hello")
-                    }
-                    
-                    Button("选项二", action: { print("选项二") })
-                    Divider()
-                    Button("设置", action: { print("设置") })
-                } label: {
-                    Label("菜单", systemImage: "ellipsis.circle")
-                }
+            NavigationLink {
+                MarkdownView(content: content?.content ?? "", isMarkdown: true)
+                    .navigationTitle("文章预览")
+            } label: {
+                Label("预览文章", systemImage: SFSymbol.play.rawValue)
+            }
+            
+            Button {
+                savePostContent()
+            } label: {
+                Label("保存", systemImage: SFSymbol.save.rawValue)
             }
         }
         .task {
@@ -70,7 +79,29 @@ struct PostContentView: View {
                 isLoaded = true
             }
         }
+        .loadingAlert(isPresented: $isSaving, message: "正在保存", closableAfter: .seconds(10))
+        .onDisappear {
+            // 关闭时保存文章
+            savePostContent()
+        }
         .navigationTitle(post.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    /// 保存文章内容
+    private func savePostContent() {
+        Task {
+            withAnimation {
+                isSaving = true
+            }
+            if let err = await vm.updatePostContent(id: post.postId, content: content?.content ?? "") {
+                // 发生错误
+                alertMessage = err
+                showAlert = true
+            }
+            withAnimation {
+                isSaving = false
+            }
+        }
     }
 }

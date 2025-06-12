@@ -4,6 +4,13 @@
         <meta charset="UTF-8">
             <title>文章预览</title>
             <style>
+                @font-face {
+                    font-family: 'JetBrains Mono';
+                    font-style: normal;
+                    font-weight: normal;
+                    font-display: swap;
+                    src: url('JetBrainsMono-Regular.woff2') format('woff2');
+                }
                 body {
                     font-family: -apple-system;
                 }
@@ -13,16 +20,38 @@
                         background-color: #1B1C20;
                     }
                 }
+                code:not([class]) {
+                    font-family: 'JetBrains Mono', monospace;
+                    border-radius: 0.25rem;
+                    padding-top: 0.125rem;
+                    padding-bottom: 0.125rem;
+                    padding-left: 0.5rem;
+                    padding-right: 0.5rem;
+                    margin-left: 0.25rem;
+                    margin-right: 0.25rem;
+                    background-color: #f7f7f9;
+                    color: #ef4444;
+                    @media (prefers-color-scheme: dark) {
+                        background-color: #282c34;
+                        color: #abb2bf;
+                    }
+                }
+                code:not([class])::before,
+                code:not([class])::after {
+                    content: "";
+                    display: inline;
+                }
+                
             </style>
-            <link rel="stylesheet" href="./highlight.min.css">
-                <script src="./highlight.min.js"></script>
-                <script src="./tailwind.js"></script>
-                <script src="./tailwind.forms.js"></script>
+            <link rel="stylesheet" href="highlight.min.css">
+                <script src="highlight.min.js"></script>
+                <script src="tailwind.js"></script>
+                <script src="tailwind.forms.js"></script>
     </head>
     <body>
-        <div id="content" class="dark:bg-[#1B1C20] text-[4vw] p-10 max-w-full prose dark:prose-invert prose-pre:text-[4vw] prose-pre:shadow-2xl prose-pre:rounded-2xl prose-pre:p-0 prose-pre:m-0 prose-pre:mb-5 prose-table:inline-block prose-table:p-2 prose-table:shadow prose-table:border-1 prose-table:rounded prose-table:border-gray-200 dark:prose-table:border-gray-600 prose-table:overflow-x-auto"></div>
+        <div id="content" class="dark:bg-[#1B1C20] text-[3.5vw] p-10 max-w-full prose dark:prose-invert prose-pre:text-[3.5vw] prose-pre:shadow-2xl prose-code:font-['JetBrains_Mono'] prose-pre:rounded-2xl prose-pre:p-0 prose-pre:m-0 prose-pre:mb-5 prose-table:inline-block prose-table:p-2 prose-table:shadow prose-table:border-1 prose-table:rounded prose-table:border-gray-200 dark:prose-table:border-gray-600 prose-table:overflow-x-auto"></div>
         
-        <script src="./marked.min.js"></script>
+        <script src="marked.min.js"></script>
         
         <script>
             tailwind.config = {

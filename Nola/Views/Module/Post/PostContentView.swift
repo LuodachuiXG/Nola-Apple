@@ -58,7 +58,7 @@ struct PostContentView: View {
             Button {
                 savePostContent()
             } label: {
-                Label("保存", systemImage: SFSymbol.save.rawValue)
+                Text("保存")
             }
         }
         .task {
@@ -91,9 +91,7 @@ struct PostContentView: View {
     /// 保存文章内容
     private func savePostContent() {
         Task {
-            withAnimation {
-                isSaving = true
-            }
+            isSaving = true
             if let err = await vm.updatePostContent(id: post.postId, content: content?.content ?? "") {
                 // 发生错误
                 alertMessage = err

@@ -26,6 +26,8 @@ enum SFSymbol: String {
     /// 菜单
     case menu = "line.3.horizontal"
     
+
+    
     
     /// 管理员 - 圆形
     case adminCircle = "person.circle"
@@ -57,4 +59,25 @@ enum SFSymbol: String {
     
     /// 播放（预览文章）
     case play = "play"
+    
+    /// 列表
+    case list = "list.bullet"
+    
+    /// 添加
+    case plus = "plus"
+    
+    /// X
+    case x = "xmark"
+    
+    /// 过滤
+    case filter = "line.3.horizontal.decrease"
+    
+    /// 搜索
+    case search = "magnifyingglass"
+    
+    /// 字符
+    case character = "character"
+    
+    /// 信息
+    case info = "info.circle"
 }

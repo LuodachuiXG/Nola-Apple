@@ -14,8 +14,8 @@ struct PostDetailView: View {
     
     @Environment(\.dismiss) var dismiss
     
-    // 保存回调事件
-    private var onSavedCallback: () -> Void = {}
+    // 保存回调事件 （修改后的文章, 是否是永久删除操作）
+    private var onSavedCallback: (_ post: Post, _ delete: Bool) -> Void = { _, _ in }
     
     // 标记当前文章数据是否改变，用于在 dismiss 时触发上面的 onSaved 方法
     @State private var dataChange: Bool = false
@@ -118,7 +118,7 @@ struct PostDetailView: View {
         }
     }
     
-    init(post: Post, viewModel: PostViewModel, onSaved: @escaping () -> Void) {
+    init(post: Post, viewModel: PostViewModel, onSaved: @escaping (_ post: Post, _ delete: Bool) -> Void) {
         self.post = post
         self.vm = viewModel
         self.category = post.category
@@ -188,6 +188,13 @@ struct PostDetailView: View {
                                 .lineLimit(1)
                                 .foregroundStyle(Color.secondary)
                         }
+                        .contextMenu {
+                            Button {
+                                self.category = nil
+                            } label: {
+                                Label("清除分类", systemImage: SFSymbol.x.rawValue)
+                            }
+                        }
                     }
                 }
                 
@@ -210,6 +217,13 @@ struct PostDetailView: View {
                                 .lineLimit(1)
                                 .foregroundStyle(Color.secondary)
                         }
+                        .contextMenu {
+                            Button {
+                                self.tags = []
+                            } label: {
+                                Label("清除标签", systemImage: SFSymbol.x.rawValue)
+                            }
+                        }
                     }
                 }
             }
@@ -224,7 +238,7 @@ struct PostDetailView: View {
                 }
                 
                 // 文章状态（文章在回收站时不显示）
-                if post.status != .DELETE {
+                if post.status != .DELETED {
                     Picker(selection: $post.status) {
                         Text("已发布")
                             .tag(PostStatus.PUBLISHED)
@@ -296,7 +310,7 @@ struct PostDetailView: View {
             }
             
             Section {
-                if post.status != .DELETE {
+                if post.status != .DELETED {
                     Button("加入回收站", role: .destructive) {
                         showRecycleAlert = true
                     }
@@ -315,6 +329,8 @@ struct PostDetailView: View {
             }
             
         }
+        // 错误弹窗
+        .messageAlert(isPresented: $showErrorAlert, message: errorAlertMsg)
         // 回收文章弹窗
         .confirmAlert(isPresented: $showRecycleAlert, message: "要将当前文章放入回收站吗") {
             onRecyclePost()
@@ -409,7 +425,10 @@ struct PostDetailView: View {
                 showErrorAlert = true
             } else {
                 // 保存成功
-                onSavedCallback()
+                var p = post
+                // 因为当前设置文章是否加密是用的独立的 isEncrypt 变量，所以加密状态如果改变，需要修改到原 post 中回调
+                p.encrypted = isEncrypt ?? p.encrypted
+                onSavedCallback(p, false)
                 dismiss()
             }
             
@@ -428,10 +447,10 @@ struct PostDetailView: View {
             } else {
                 // 成功放入回收站
                 withAnimation {
-                    post.status = .DELETE
+                    post.status = .DELETED
                 }
                 // 告知上一页文章数据发生改变
-                onSavedCallback()
+                onSavedCallback(post, false)
             }
             
             isLoading = false
@@ -442,7 +461,7 @@ struct PostDetailView: View {
     /// - Parameters:
     ///   - status: 恢复文章状态（只能设为 DRAFT 或者 PUBLISHED）
     private func onRestorePost(status: PostStatus) {
-        guard status != .DELETE else { return }
+        guard status != .DELETED else { return }
         isLoading = true
         Task {
             if let err = await vm.restorePost(ids: [post.postId], status: status) {
@@ -455,7 +474,7 @@ struct PostDetailView: View {
                     post.status = status
                 }
                 // 告知上一页文章数据发生改变
-                onSavedCallback()
+                onSavedCallback(post, false)
             }
             
             isLoading = false
@@ -464,7 +483,7 @@ struct PostDetailView: View {
     
     /// 彻底删除文章，只能在文章处于 DELETE 状态时调用，即文章已经在回收站时。
     private func onDeletePost() {
-        guard post.status == .DELETE else { return }
+        guard post.status == .DELETED else { return }
     
         isLoading = true
         Task {
@@ -474,7 +493,7 @@ struct PostDetailView: View {
                 showErrorAlert = true
             } else {
                 // 删除成功
-                onSavedCallback()
+                onSavedCallback(post, true)
                 dismiss()
             }
             isLoading = false

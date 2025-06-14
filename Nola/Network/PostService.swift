@@ -56,6 +56,18 @@ struct PostService {
         )
     }
     
+    /// 根据文章 ID 获取单个文章
+    /// - Parameters:
+    ///   - id: 文章 ID
+    static func getPostById(
+        id: Int,
+    ) async throws -> ApiResponse<Post> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post/\(id)",
+            method: .get
+        )
+    }
+    
     /// 更新文章
     /// - Parameters:
     ///   - postId: 文章 ID
@@ -151,6 +163,7 @@ struct PostService {
             array: ids
         )
     }
+    
     
     /// 获取文章正文
     /// 此接口只能用于获取文章已经发布的正文。

@@ -43,7 +43,7 @@ struct PostCard: View {
                         Image(symbol: .hidden)
                             .resizable()
                             .frame(width: 18, height: 15)
-                            .tint(.brown)
+                            .tint(PostVisible.HIDDEN.color)
                     }
                     
                     // 标题
@@ -58,22 +58,38 @@ struct PostCard: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(2)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary.opacity(0.65))
                     .multilineTextAlignment(.leading)
                 
                 // 标签和分类
                 if post.category != nil || !post.tags.isEmpty {
-                    HStack(spacing: .defaultSpacing) {
+                    HStack {
                         if let category = post.category {
                             Text("&\(category.displayName)")
                         }
                         
-                        ForEach(post.tags, id: \.tagId) { tag in
-                            Text("#\(tag.displayName)")
+                        
+                        if post.tags.count >= 3 {
+                            Text("#\(post.tags.first!.displayName) 等 \(post.tags.count) 个标签")
+                        } else {
+                            ForEach(post.tags, id: \.tagId) { tag in
+                                Text("#\(tag.displayName)")
+                            }
                         }
                     }
                     .font(.footnote)
+                    .lineLimit(1)
                 }
+                
+                // 创建时间和浏览量
+                HStack {
+                    Text("浏览量：\(post.visit)")
+                    Spacer()
+                    Text(post.createTime.formatMillisToDateStr())
+                        
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
             .padding(.defaultSpacing)
         }
@@ -86,18 +102,6 @@ private struct PostStatusIndicatorView: View {
     
     var post: Post
     
-    // 指示器颜色
-    var statusColor: Color {
-        switch post.status {
-        case .PUBLISHED:
-                .green
-        case .DRAFT:
-                .yellow
-        case .DELETE:
-                .red
-        }
-    }
-    
     // 标记当前动画是否已经启动，防止重复启动动画线程导致出现动画异常
     @State private var isAnimateStart = false
     
@@ -108,19 +112,20 @@ private struct PostStatusIndicatorView: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(isOn ? statusColor : statusColor.opacity(0))
+//                .fill(isOn ? statusColor : statusColor.opacity(0))
+                .fill(post.status.color)
                 .frame(width: isOn ? 10 : 20, height: isOn ? 10 : 20)
             
-//            Circle()
-//                .fill(statusColor)
-//                .frame(width: 10, height: 10)
+            //            Circle()
+            //                .fill(statusColor)
+            //                .frame(width: 10, height: 10)
         }.onAppear {
-//            if !isAnimateStart {
-//                withAnimation(.easeInOut(duration: 1.5).delay(0.6).repeatForever(autoreverses: false)) {
-//                    isOn.toggle()
-//                }
-//                isAnimateStart = true
-//            }
+            //            if !isAnimateStart {
+            //                withAnimation(.easeInOut(duration: 1.5).delay(0.6).repeatForever(autoreverses: false)) {
+            //                    isOn.toggle()
+            //                }
+            //                isAnimateStart = true
+            //            }
         }
         .frame(maxWidth: 10, maxHeight: 10)
     }

@@ -77,21 +77,8 @@ struct PostView: View {
                     }
                     ForEach(vm.posts, id: \.postId) { post in
                         NavigationLink {
-                            PostDetailView(post: post, viewModel: vm) { newPost, isDelete in
-                                // 发生文章保存事件，刷新文章内容
-                                Task {
-                                    if isDelete {
-                                        // 当前是永久删除操作
-                                        vm.deleteExistPost(post: post)
-                                    } else {
-                                        // 普通修改操作
-                                        if let err = await vm.updateExistPost(post: newPost) {
-                                            self.errorMessage = err
-                                            self.showErrorAlert = true
-                                        }
-                                    }
-                                }
-                            }
+                            // 文章详情页面
+                            postDetailView(post: post)
                         } label: {
                             PostCard(post: post)
                                 .tint(.primary)
@@ -128,11 +115,13 @@ struct PostView: View {
         }
         .toolbar {
             // 添加文章按钮
-            Button {
-                
+            NavigationLink {
+                // 新增文章
+                postDetailView(post: nil)
             } label: {
                 Label("添加文章", systemImage: SFSymbol.plus.rawValue)
             }
+
             
             // 文章过滤菜单
             Menu {
@@ -246,6 +235,27 @@ struct PostView: View {
             }
         }
         
+    }
+    
+    /// 文章详情 View
+    /// - Parameters:
+    ///   - post: 文章实体（非 nil 为编辑现有文章，nil 为新增文章）
+    private func postDetailView(post: Post?) -> some View {
+        return PostDetailView(post: post, viewModel: vm) { newPost, isDelete in
+            // 发生文章保存事件，刷新文章内容
+            Task {
+                if isDelete {
+                    // 当前是永久删除操作
+                    vm.deleteExistPost(post: newPost)
+                } else {
+                    // 普通修改操作
+                    if let err = await vm.updateExistPost(post: newPost) {
+                        self.errorMessage = err
+                        self.showErrorAlert = true
+                    }
+                }
+            }
+        }
     }
     
     /// 刷新文章

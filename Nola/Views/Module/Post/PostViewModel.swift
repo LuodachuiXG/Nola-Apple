@@ -129,6 +129,7 @@ final class PostViewModel: ObservableObject {
         if let error = error {
             return error
         } else if let p = newPost {
+            
             for i in 0..<posts.endIndex {
                 if posts[i].postId == p.postId {
                     withAnimation {
@@ -136,6 +137,11 @@ final class PostViewModel: ObservableObject {
                     }
                     return nil
                 }
+            }
+            
+            // for 循环结束了走到这里，证明 posts 中没有当前文章，所以可能是新增的文章，查到 posts 头部
+            withAnimation {
+                posts.insert(p, at: 0)
             }
         }
         return nil
@@ -182,6 +188,65 @@ final class PostViewModel: ObservableObject {
         }
         
         return nil
+    }
+    
+    /// 添加文章
+    /// - Parameters:
+    ///   - title: 文章标题
+    ///   - autoGenerateExcerpt: 是否自动生成摘要（默认 false）
+    ///   - excerpt: 文章摘要
+    ///   - slug: 文章别名
+    ///   - allowComment: 是否允许评论
+    ///   - status: 文章状态（不能设为 DELETE，DELETE 请调用专门的删除文章接口）
+    ///   - visible: 文章可见性
+    ///   - content: 文章内容
+    ///   - categoryId: 分类 ID
+    ///   - tagIds: 标签 ID 数组
+    ///   - cover: 文章封面
+    ///   - pinned: 是否置顶（默认 false）
+    ///   - password: 文章密码
+    /// - Returns: (文章, 错误信息）
+    func addPost(
+        title: String,
+        autoGenerateExcerpt: Bool?,
+        excerpt: String?,
+        slug: String,
+        allowComment: Bool,
+        status: PostStatus,
+        visible: PostVisible,
+        content: String,
+        categoryId: Int?,
+        tagIds: [Int]?,
+        cover: String?,
+        pinned: Bool?,
+        password: String?
+    ) async -> (post: Post?, error: String?) {
+        do {
+            let ret = try await PostService.addPost(
+                title: title,
+                autoGenerateExcerpt: autoGenerateExcerpt,
+                excerpt: excerpt,
+                slug: slug,
+                allowComment: allowComment,
+                status: status,
+                visible: visible,
+                content: content,
+                categoryId: categoryId,
+                tagIds: tagIds,
+                cover: cover,
+                pinned: pinned,
+                password: password
+            )
+            if let post = ret.data {
+                return (post, nil)
+            }
+        } catch let err as ApiError {
+            return (nil, err.message)
+        } catch {
+            return (nil, error.localizedDescription)
+        }
+        
+        return (nil, nil)
     }
     
     

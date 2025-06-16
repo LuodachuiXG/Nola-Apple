@@ -68,6 +68,57 @@ struct PostService {
         )
     }
     
+    /// 添加文章
+    /// - Parameters:
+    ///   - title: 文章标题
+    ///   - autoGenerateExcerpt: 是否自动生成摘要（默认 false）
+    ///   - excerpt: 文章摘要
+    ///   - slug: 文章别名
+    ///   - allowComment: 是否允许评论
+    ///   - status: 文章状态（不能设为 DELETE，DELETE 请调用专门的删除文章接口）
+    ///   - visible: 文章可见性
+    ///   - content: 文章内容
+    ///   - categoryId: 分类 ID
+    ///   - tagIds: 标签 ID 数组
+    ///   - cover: 文章封面
+    ///   - pinned: 是否置顶（默认 false）
+    ///   - password: 文章密码
+    static func addPost(
+        title: String,
+        autoGenerateExcerpt: Bool?,
+        excerpt: String?,
+        slug: String,
+        allowComment: Bool,
+        status: PostStatus,
+        visible: PostVisible,
+        content: String,
+        categoryId: Int?,
+        tagIds: [Int]?,
+        cover: String?,
+        pinned: Bool?,
+        password: String?
+    ) async throws -> ApiResponse<Post> {
+        return try await NetworkManager.shared.request(
+            endpoint: "/admin/post",
+            method: .post,
+            parameters: [
+                "title": title,
+                "autoGenerateExcerpt": autoGenerateExcerpt,
+                "excerpt": excerpt,
+                "slug": slug,
+                "allowComment": allowComment,
+                "status": status.rawValue,
+                "visible": visible.rawValue,
+                "content": content,
+                "categoryId": categoryId,
+                "tagIds": tagIds,
+                "cover": cover,
+                "pinned": pinned,
+                "password": password
+            ]
+        )
+    }
+    
     /// 更新文章
     /// - Parameters:
     ///   - postId: 文章 ID

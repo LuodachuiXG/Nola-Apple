@@ -14,17 +14,22 @@ struct PostDetailView: View {
     
     @Environment(\.dismiss) var dismiss
     
-    // 保存回调事件 （修改后的文章, 是否是永久删除操作）
-    private var onSavedCallback: (_ post: Post, _ delete: Bool) -> Void = { _, _ in }
-    
-    // 标记当前文章数据是否改变，用于在 dismiss 时触发上面的 onSaved 方法
-    @State private var dataChange: Bool = false
-    
     // 当前查看的文章
     @State var post: Post
     
     // 文章 ViewModel
     @ObservedObject private var vm: PostViewModel
+    
+    // 标记当前是否是添加文章
+    @State private var isAddPost = false
+    // 标记当前是否自动根据文章标题生成文章别名（手动修改别名后置 false）
+    @State private var autoGenerateSlugByTitle = true
+    
+    // 保存回调事件 （修改后的文章, 是否是永久删除操作）
+    private var onSavedCallback: (_ post: Post, _ delete: Bool) -> Void = { _, _ in }
+    
+    // 标记当前文章数据是否改变，用于在 dismiss 时触发上面的 onSaved 方法
+    @State private var dataChange: Bool = false
     
     // 当前文章的分类和标签
     @State private var category: Category?
@@ -50,7 +55,7 @@ struct PostDetailView: View {
     // 文章原标题（防止修改文章标题时，因为 post 状态改变而导致 navigation title 改变）
     private let originalTitle: String
     
-    // 文章摘要
+    // 文章摘要描述
     private var postExcerpt: String {
         let excerpt = post.excerpt
         if excerpt.isEmpty {
@@ -118,13 +123,42 @@ struct PostDetailView: View {
         }
     }
     
-    init(post: Post, viewModel: PostViewModel, onSaved: @escaping (_ post: Post, _ delete: Bool) -> Void) {
-        self.post = post
+    /// init
+    /// - Parameters:
+    ///   - post: 文章实体（非 nil 为编辑现有文章，nil 为添加文章）
+    ///   - viewModel: PostViewModel 实体
+    ///   - onSaved: 保存回调
+    init(post: Post?, viewModel: PostViewModel, onSaved: @escaping (_ post: Post, _ delete: Bool) -> Void) {
+        var p = post
+        if p == nil {
+            // 当前是新增文章
+            isAddPost = true
+            p = Post(
+                postId: -1,
+                title: "",
+                autoGenerateExcerpt: true,
+                excerpt: "",
+                slug: "",
+                allowComment: true,
+                pinned: false,
+                status: .DRAFT,
+                visible: .VISIBLE,
+                encrypted: false,
+                visit: -1,
+                tags: [],
+                createTime: -1,
+                lastModifyTime: nil
+            )
+            originalTitle = "添加文章"
+        } else {
+            originalTitle = p!.title
+        }
+        
+        self.post = p!
         self.vm = viewModel
-        self.category = post.category
-        self.tags = post.tags
+        self.category = p!.category
+        self.tags = p!.tags
         self.onSavedCallback = onSaved
-        originalTitle = post.title
     }
     
     var body: some View {
@@ -139,14 +173,38 @@ struct PostDetailView: View {
             
             Section("基本信息") {
                 OptionItem(label: "标题") {
-                    TextField(text: $post.title) {
+                    TextField(
+                        text: Binding(
+                            get: {
+                                post.title
+                            },
+                            set: { newValue in
+                                post.title = newValue
+                                if isAddPost && autoGenerateSlugByTitle {
+                                    // 当前是添加文章，并且自动根据标题生成别名为 true。自动同步修改文章别名
+                                    post.slug = newValue.toPinyin()
+                                }
+                            }
+                        )
+                    ) {
                         Text("文章标题")
                     }
                     .textInputAutocapitalization(.never)
                 }
                 
                 OptionItem(label: "别名") {
-                    TextField(text: $post.slug) {
+                    TextField(
+                        text: Binding(
+                            get: {
+                                post.slug
+                            },
+                            set: { newValue in
+                                post.slug = newValue
+                                // 手动修改后，禁止自动根据标题生成别名
+                                autoGenerateSlugByTitle = false
+                            }
+                        )
+                    ) {
                         Text("文章别名")
                     }
                     .textInputAutocapitalization(.never)
@@ -260,18 +318,21 @@ struct PostDetailView: View {
                 }
             }
             
-            Section("静态信息") {
-                OptionItem(label: "访问量") {
-                    Text(String(post.visit))
-                }
-                
-                if let modifyTime = post.lastModifyTime {
-                    OptionItem(label: "修改时间") {
-                        Text(String(modifyTime.formatMillisToDateStr()))
+            // 静态信息仅在编辑文章时可见
+            if !isAddPost {
+                Section("静态信息") {
+                    OptionItem(label: "访问量") {
+                        Text(String(post.visit))
                     }
-                }
-                OptionItem(label: "创建时间") {
-                    Text(String(post.createTime.formatMillisToDateStr()))
+                    
+                    if let modifyTime = post.lastModifyTime {
+                        OptionItem(label: "修改时间") {
+                            Text(String(modifyTime.formatMillisToDateStr()))
+                        }
+                    }
+                    OptionItem(label: "创建时间") {
+                        Text(String(post.createTime.formatMillisToDateStr()))
+                    }
                 }
             }
             
@@ -289,41 +350,45 @@ struct PostDetailView: View {
                 }
             }
             
-            Section {
-                NavigationLink {
-                    PreviewPost(vm: vm, post: $post)
-                } label: {
-                    Text("查看文章")
-                        .foregroundStyle(Color.blue)
+            // 仅当编辑文章时显示
+            if !isAddPost {
+                Section {
+                    NavigationLink {
+                        PreviewPost(vm: vm, post: $post)
+                    } label: {
+                        Text("查看文章")
+                            .foregroundStyle(Color.blue)
+                    }
                 }
-
             }
             
-            Section("返回时自动保存文章内容") {
+            Section(isAddPost ? "编辑文章" : "返回时自动保存文章内容") {
                 NavigationLink {
-                    PostContentView(vm: vm, post: $post)
+                    PostContentView(vm: vm, post: $post, isAddPost: $isAddPost)
                 } label: {
                     Text("编辑文章")
                         .foregroundStyle(Color.blue)
                 }
-
             }
             
-            Section {
-                if post.status != .DELETED {
-                    Button("加入回收站", role: .destructive) {
-                        showRecycleAlert = true
-                    }
-                    
-                    
-                } else {
-                    Button("移出回收站") {
-                        showRestoreAlert = true
-                    }
-                    .foregroundStyle(Color(cgColor: UIColor.systemGreen.cgColor))
-                    
-                    Button("彻底删除", role: .destructive) {
-                        showDeleteAlert = true
+            // 只有在编辑文章时才显示删除操作
+            if !isAddPost {
+                Section {
+                    if post.status != .DELETED {
+                        Button("加入回收站", role: .destructive) {
+                            showRecycleAlert = true
+                        }
+                        
+                        
+                    } else {
+                        Button("移出回收站") {
+                            showRestoreAlert = true
+                        }
+                        .foregroundStyle(Color(cgColor: UIColor.systemGreen.cgColor))
+                        
+                        Button("彻底删除", role: .destructive) {
+                            showDeleteAlert = true
+                        }
                     }
                 }
             }
@@ -373,7 +438,7 @@ struct PostDetailView: View {
             }
         }
         .toolbar {
-            Button("保存") {
+            Button(isAddPost ? "发布" : "保存") {
                 onSave()
             }
         }
@@ -403,36 +468,80 @@ struct PostDetailView: View {
             return false
         }
         
-        Task {
-            if let err = await vm.updatePost(
-                postId: post.postId,
-                title: post.title,
-                autoGenerateExcerpt: post.autoGenerateExcerpt,
-                excerpt: post.excerpt,
-                slug: post.slug,
-                allowComment: post.allowComment,
-                status: post.status,
-                visible: post.visible,
-                categoryId: category?.id,
-                tagIds: tags.map { $0.id },
-                cover: post.cover,
-                pinned: post.pinned,
-                encrypted: isEncrypt,
-                password: newPassword
-            ) {
-                // 发生错误
-                errorAlertMsg = err
-                showErrorAlert = true
-            } else {
-                // 保存成功
-                var p = post
-                // 因为当前设置文章是否加密是用的独立的 isEncrypt 变量，所以加密状态如果改变，需要修改到原 post 中回调
-                p.encrypted = isEncrypt ?? p.encrypted
-                onSavedCallback(p, false)
-                dismiss()
+        
+        if isAddPost {
+            // 当前是新增文章
+            Task {
+                let currTimestamp = Int(Date().timeIntervalSince1970 * 1000)
+                // 当前是新增文章，先添加文章，然后再转换为编辑文章模式
+                let ret = await vm.addPost(
+                    title: post.title.isEmpty ? "未命名" : post.title,
+                    autoGenerateExcerpt: post.autoGenerateExcerpt,
+                    excerpt: post.excerpt,
+                    // 如果文章别名为空，默认使用当前时间戳毫秒
+                    slug: post.slug.isEmpty ? String(currTimestamp) : post.slug,
+                    allowComment: post.allowComment,
+                    status: post.status,
+                    visible: post.visible,
+                    content: "",
+                    categoryId: post.category?.id,
+                    tagIds: post.tags.map { $0.id },
+                    cover: post.cover,
+                    pinned: post.pinned,
+                    password: isEncrypt == true ? newPassword : nil
+                )
+                
+                if let error = ret.error {
+                    // 新建文章发生错误
+                    errorAlertMsg = error
+                    showErrorAlert = true
+                } else if let post = ret.post {
+                    // 新建文章成功
+                    withAnimation {
+                        self.post = post
+                        // 转为编辑模式
+                        self.isAddPost = false
+                        onSavedCallback(post, false)
+                        dismiss()
+                    }
+                } else {
+                    // 文章和错误信息都为 nil
+                    errorAlertMsg = "未知错误，请稍后重试"
+                    showErrorAlert = true
+                }
+                isLoading = false
             }
-            
-            isLoading = false
+        } else {
+            // 当前是编辑文章
+        
+            Task {
+                if let err = await vm.updatePost(
+                    postId: post.postId,
+                    title: post.title,
+                    autoGenerateExcerpt: post.autoGenerateExcerpt,
+                    excerpt: post.excerpt,
+                    slug: post.slug,
+                    allowComment: post.allowComment,
+                    status: post.status,
+                    visible: post.visible,
+                    categoryId: category?.id,
+                    tagIds: tags.map { $0.id },
+                    cover: post.cover,
+                    pinned: post.pinned,
+                    encrypted: isEncrypt,
+                    password: newPassword
+                ) {
+                    // 发生错误
+                    errorAlertMsg = err
+                    showErrorAlert = true
+                } else {
+                    // 保存成功
+                    onSavedCallback(post, false)
+                    dismiss()
+                }
+                
+                isLoading = false
+            }
         }
     }
     
@@ -484,7 +593,7 @@ struct PostDetailView: View {
     /// 彻底删除文章，只能在文章处于 DELETE 状态时调用，即文章已经在回收站时。
     private func onDeletePost() {
         guard post.status == .DELETED else { return }
-    
+        
         isLoading = true
         Task {
             if let err = await vm.deletePost(ids: [post.postId]) {
@@ -535,7 +644,7 @@ private struct PreviewPost: View {
             } else if let content = ret.content {
                 postContent = content
             }
-      
+            
             withAnimation {
                 isLoading = false
             }

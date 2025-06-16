@@ -12,7 +12,7 @@ extension View {
     
     /// 消息弹窗
     /// 显示一个 OK 确定按钮
-    func messageAlert(isPresented: Binding<Bool>, message: LocalizedStringKey) -> some View {
+    func messageAlert(isPresented: Binding<Bool>, message: LocalizedStringKey, onClick: @escaping () -> Void = {}) -> some View {
         return self.alert(message, isPresented: isPresented) {
             Button("好的", role: .cancel) {
                 isPresented.wrappedValue = false
@@ -22,8 +22,8 @@ extension View {
     
     /// 消息弹窗
     /// 显示一个 OK 确定按钮
-    func messageAlert(isPresented: Binding<Bool>, message: String) -> some View {
-        return self.messageAlert(isPresented: isPresented, message: LocalizedStringKey(message))
+    func messageAlert(isPresented: Binding<Bool>, message: String, onClick: @escaping () -> Void = {}) -> some View {
+        return self.messageAlert(isPresented: isPresented, message: LocalizedStringKey(message), onClick: onClick)
     }
     
     /// 确定弹窗

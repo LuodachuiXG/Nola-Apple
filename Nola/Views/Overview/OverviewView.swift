@@ -99,7 +99,7 @@ struct OverviewView: View {
                                     tags,
                                     id: \.tagId
                                 ) { tag in
-                                    TagCard(tag: tag)
+                                    OverviewTagCard(tag: tag)
                                 }
                             }
                         }

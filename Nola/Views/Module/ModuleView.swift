@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+
+/// 模块 View
 struct ModuleView: View {
     
     @ObservedObject var contentVM: ContentViewModel

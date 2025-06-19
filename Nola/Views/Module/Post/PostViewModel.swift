@@ -139,7 +139,7 @@ final class PostViewModel: ObservableObject {
                 }
             }
             
-            // for 循环结束了走到这里，证明 posts 中没有当前文章，所以可能是新增的文章，查到 posts 头部
+            // for 循环结束了走到这里，证明 posts 中没有当前文章，所以可能是新增的文章，插入 posts 头部
             withAnimation {
                 posts.insert(p, at: 0)
             }

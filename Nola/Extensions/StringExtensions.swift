@@ -60,7 +60,7 @@ extension String {
                 result.append(char)
                 lastCharWasDash = false
             } else if !lastCharWasDash {
-                result.append("-")
+                result.append("")
                 lastCharWasDash = true
             }
         }

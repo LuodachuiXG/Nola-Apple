@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 
-/// 标签卡片
-struct TagCard: View {
+/// 概览页面标签卡片
+struct OverviewTagCard: View {
     
     var tag: BlogOverviewTag
     

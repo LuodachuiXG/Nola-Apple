@@ -22,7 +22,7 @@ extension ModuleView {
             ModuleNavData(
                 title: "标签",
                 icon: SFSymbol.tag.rawValue,
-                destination: DetailView(title: "标签"),
+                destination: TagView(),
                 count: contentVM.blogOverview?.count.tag
             ),
             ModuleNavData(

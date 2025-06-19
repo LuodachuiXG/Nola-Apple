@@ -172,7 +172,7 @@ struct PostDetailView: View {
             }
             
             Section("基本信息") {
-                OptionItem(label: "标题") {
+                ListItem(label: "标题") {
                     TextField(
                         text: Binding(
                             get: {
@@ -192,7 +192,7 @@ struct PostDetailView: View {
                     .textInputAutocapitalization(.never)
                 }
                 
-                OptionItem(label: "别名") {
+                ListItem(label: "别名") {
                     TextField(
                         text: Binding(
                             get: {
@@ -215,7 +215,7 @@ struct PostDetailView: View {
                     }
                 }
                 
-                OptionItem(label: "摘要") {
+                ListItem(label: "摘要") {
                     NavigationLink {
                         ExcerptView(post: $post)
                     } label: {
@@ -229,7 +229,7 @@ struct PostDetailView: View {
                 }
                 
                 // 分类选择
-                OptionItem(label: "分类") {
+                ListItem(label: "分类") {
                     NavigationLink {
                         SearchablePicker(
                             items: vm.categories,
@@ -257,7 +257,7 @@ struct PostDetailView: View {
                 }
                 
                 // 标签选择
-                OptionItem(label: "标签") {
+                ListItem(label: "标签") {
                     NavigationLink {
                         SearchablePicker(
                             items: vm.tags,
@@ -321,23 +321,23 @@ struct PostDetailView: View {
             // 静态信息仅在编辑文章时可见
             if !isAddPost {
                 Section("静态信息") {
-                    OptionItem(label: "访问量") {
+                    ListItem(label: "访问量") {
                         Text(String(post.visit))
                     }
                     
                     if let modifyTime = post.lastModifyTime {
-                        OptionItem(label: "修改时间") {
+                        ListItem(label: "修改时间") {
                             Text(String(modifyTime.formatMillisToDateStr()))
                         }
                     }
-                    OptionItem(label: "创建时间") {
+                    ListItem(label: "创建时间") {
                         Text(String(post.createTime.formatMillisToDateStr()))
                     }
                 }
             }
             
             Section("密码") {
-                OptionItem(label: "文章密码") {
+                ListItem(label: "文章密码") {
                     NavigationLink {
                         PasswordView(post: post, isEncrypted: $isEncrypted, newPassword: $newPassword)
                     } label: {
@@ -797,23 +797,4 @@ private struct PasswordView: View {
 }
 
 
-/// List 选项
-private struct OptionItem<Content: View>: View {
-    
-    var label: String
-    var content: Content
-    
-    init(label: String, @ViewBuilder content: () -> Content) {
-        self.label = label
-        self.content = content()
-    }
-    
-    var body: some View {
-        HStack {
-            Text(label)
-            Spacer()
-            content
-                .multilineTextAlignment(.trailing)
-        }
-    }
-}
+

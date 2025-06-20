@@ -22,6 +22,8 @@ struct TagView: View {
     // 标记当前是否已经完成第一次刷新
     @State private var firstRefresh = false
     
+    @State private var showDeleteAlert = false
+    @State private var waitForDeleteTag: Tag? = nil
     
     private let columns: [GridItem] = [.init(.flexible()), .init(.flexible())]
     
@@ -46,7 +48,14 @@ struct TagView: View {
                             }
                         } label: {
                             TagCard(tag: tag)
-                                .tint(.primary)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        waitForDeleteTag = tag
+                                        showDeleteAlert = true
+                                    } label: {
+                                        Label("删除标签", systemImage: SFSymbol.trash.rawValue)
+                                    }
+                                }
                         }
                     }
                 }
@@ -70,6 +79,14 @@ struct TagView: View {
         .navigationTitle("标签")
         .navigationBarTitleDisplayMode(.inline)
         .messageAlert(isPresented: $showAlert, message: alertMessage)
+        .confirmAlert(
+            isPresented: $showDeleteAlert,
+            message: "确定要删除标签 [\(waitForDeleteTag?.displayName ?? "未知标签")] 吗"
+        ) {
+            if let tag = waitForDeleteTag {
+                deleteTag(tag: tag)
+            }
+        }
         .task {
             if !firstRefresh {
                 // 没有完成首次刷新才刷
@@ -100,7 +117,23 @@ struct TagView: View {
         }
     }
     
-    /// 删除现有的标签
+    /// 删除标签（云端）
+    /// - Parameters:
+    ///   - tag: 要删除的标签实体
+    private func deleteTag(tag: Tag) {
+        Task {
+            if let err = await vm.deleteTag(tag: tag) {
+                // 发生错误
+                alertMessage = err
+                showAlert = true
+            } else {
+                // 成功后删除本地标签
+                deleteExistTag(tag: tag)
+            }
+        }
+    }
+    
+    /// 删除现有的标签（本地变量）
     /// - Parameters:
     ///   - tag: 要删除的标签实体
     private func deleteExistTag(tag: Tag) {

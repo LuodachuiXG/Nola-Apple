@@ -12,7 +12,7 @@ struct Tag: Codable, Equatable, Identifiable, Hashable {
     var id: Int { tagId }
     
     /// 标签 ID
-    var tagId: Int
+    let tagId: Int
     /// 标签名
     var displayName: String
     /// 标签别名
@@ -20,5 +20,5 @@ struct Tag: Codable, Equatable, Identifiable, Hashable {
     /// 标签颜色（#FF0000）
     var color: String?
     /// 文章数量
-    var postCount: Int
+    let postCount: Int
 }

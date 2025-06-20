@@ -13,9 +13,19 @@ import UIKit
 /// 浏览最多的文章展示卡片
 struct MostViewedPostCard: View {
     
+    @Environment(\.colorScheme) var colorScheme
+    
     var post: Post
     
     private let feedbackGenerator = UIImpactFeedbackGenerator()
+    
+    private var isLight: Bool {
+        colorScheme == .light
+    }
+    
+    private var textColor: Color {
+        isLight ? .black : .white
+    }
     
     // 底部说明文字
     var caption: String {
@@ -58,13 +68,13 @@ struct MostViewedPostCard: View {
                             Text(post.title)
                                 .font(.title3)
                                 .lineLimit(1)
-                                .foregroundStyle(post.actualCover == nil ? Color.primary : Color.white)
+                                .foregroundStyle(post.actualCover == nil ? Color.primary : textColor)
                                 .shadow(radius: post.actualCover == nil ? 0 : .defaultShadowRadius)
                         }
                         
                         Text(caption)
                             .font(.caption)
-                            .foregroundStyle(post.actualCover == nil ? Color.secondary : Color.white)
+                            .foregroundStyle(post.actualCover == nil ? Color.secondary : textColor)
                             .lineLimit(1)
                             .shadow(radius: post.actualCover == nil ? 0 : .defaultShadowRadius)
                         

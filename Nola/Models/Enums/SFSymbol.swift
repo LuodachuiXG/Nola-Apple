@@ -80,4 +80,7 @@ enum SFSymbol: String {
     
     /// 信息
     case info = "info.circle"
+    
+    /// 垃圾桶
+    case trash = "trash"
 }

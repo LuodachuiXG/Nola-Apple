@@ -48,7 +48,7 @@ struct CategoryService {
         displayName: String,
         slug: String,
         cover: String?,
-        unifiedCover: String?
+        unifiedCover: Bool?
     ) async throws -> ApiResponse<Category> {
         return try await NetworkManager.shared.request(
             endpoint: "/admin/category",
@@ -74,7 +74,7 @@ struct CategoryService {
         displayName: String,
         slug: String,
         cover: String?,
-        unifiedCover: String?
+        unifiedCover: Bool?
     ) async throws -> ApiResponse<Bool> {
         return try await NetworkManager.shared.request(
             endpoint: "/admin/category",

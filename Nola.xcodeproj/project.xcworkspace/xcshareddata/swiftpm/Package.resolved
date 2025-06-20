@@ -1,5 +1,5 @@
 {
-  "originHash" : "76d4b04e7149df6dd41aefded3bd6f70c321376158039d2a304bedc4de9282f0",
+  "originHash" : "890ef3a4887209fe0d1d4163f661e984c91204cbc0c790498158cec447943fe6",
   "pins" : [
     {
       "identity" : "dotlottie-ios",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "451c6dfd5ecec2cf626d1d9ca81c2d4a60355172",
         "version" : "3.1.3"
+      }
+    },
+    {
+      "identity" : "waterfallgrid",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/paololeonardi/WaterfallGrid.git",
+      "state" : {
+        "revision" : "c7c08652c3540adf8e48409c351879b4caea7e89",
+        "version" : "1.1.0"
       }
     }
   ],

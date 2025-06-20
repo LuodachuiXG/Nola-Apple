@@ -86,7 +86,7 @@ struct OverviewView: View {
                                     categories,
                                     id: \.categoryId
                                 ) { category in
-                                    CategoryCard(category: category)
+                                    OverviewCategoryCard(category: category)
                                 }
                             }
                         }

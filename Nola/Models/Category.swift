@@ -14,13 +14,13 @@ struct Category: Codable, Equatable, Identifiable, Hashable {
     /// 分类 ID
     let categoryId: Int
     /// 分类名
-    let displayName: String
+    var displayName: String
     /// 分类别名
-    let slug: String
+    var slug: String
     /// 分类封面
-    let cover: String?
+    var cover: String?
     /// 是否统一封面
-    let unifiedCover: Bool
+    var unifiedCover: Bool
     /// 文章数量
     let postCount: Int
 }

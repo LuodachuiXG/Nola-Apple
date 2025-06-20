@@ -28,7 +28,7 @@ extension ModuleView {
             ModuleNavData(
                 title: "分类",
                 icon: SFSymbol.category.rawValue,
-                destination: DetailView(title: "分类"),
+                destination: CategoryView(),
                 count: contentVM.blogOverview?.count.category
             ),
             ModuleNavData(

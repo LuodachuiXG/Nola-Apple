@@ -30,6 +30,7 @@ struct TagCard: View {
                 }
             }
             .frame(maxWidth: .infinity)
+            .tint(.primary)
         }
     }
 }

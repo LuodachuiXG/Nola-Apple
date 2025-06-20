@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB336C5D2E050E8900AD1F95 /* WaterfallGrid in Frameworks */ = {isa = PBXBuildFile; productRef = CB336C5C2E050E8900AD1F95 /* WaterfallGrid */; };
 		CB8405582DEEA6A400B497F0 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = CB8405572DEEA6A400B497F0 /* SDWebImageSwiftUI */; };
 		CBBAF50F2DD9073D005333E6 /* hello.lottie in Resources */ = {isa = PBXBuildFile; fileRef = CBBAF50E2DD9073D005333E6 /* hello.lottie */; };
 		CBBAF5132DD908DA005333E6 /* check.lottie in Resources */ = {isa = PBXBuildFile; fileRef = CBBAF5122DD908DA005333E6 /* check.lottie */; };
@@ -45,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB336C5D2E050E8900AD1F95 /* WaterfallGrid in Frameworks */,
 				CB8405582DEEA6A400B497F0 /* SDWebImageSwiftUI in Frameworks */,
 				CBCECC3D2DD44BFC0087B2B5 /* DotLottie in Frameworks */,
 			);
@@ -101,6 +103,7 @@
 			packageProductDependencies = (
 				CBCECC3C2DD44BFC0087B2B5 /* DotLottie */,
 				CB8405572DEEA6A400B497F0 /* SDWebImageSwiftUI */,
+				CB336C5C2E050E8900AD1F95 /* WaterfallGrid */,
 			);
 			productName = Nola;
 			productReference = CB3B65D32D887413003B3751 /* Nola.app */;
@@ -133,6 +136,7 @@
 			packageReferences = (
 				CBCECC3B2DD44BFC0087B2B5 /* XCRemoteSwiftPackageReference "dotlottie-ios" */,
 				CB8405562DEEA6A400B497F0 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				CB336C5B2E050E8900AD1F95 /* XCRemoteSwiftPackageReference "WaterfallGrid" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CB3B65D42D887413003B3751 /* Products */;
@@ -399,6 +403,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		CB336C5B2E050E8900AD1F95 /* XCRemoteSwiftPackageReference "WaterfallGrid" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/paololeonardi/WaterfallGrid.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
 		CB8405562DEEA6A400B497F0 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
@@ -418,6 +430,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		CB336C5C2E050E8900AD1F95 /* WaterfallGrid */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CB336C5B2E050E8900AD1F95 /* XCRemoteSwiftPackageReference "WaterfallGrid" */;
+			productName = WaterfallGrid;
+		};
 		CB8405572DEEA6A400B497F0 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CB8405562DEEA6A400B497F0 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;

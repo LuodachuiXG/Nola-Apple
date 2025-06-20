@@ -10,7 +10,7 @@ import SwiftUI
 
 
 /// 分类卡片
-struct CategoryCard: View {
+struct OverviewCategoryCard: View {
     
     var category: BlogOverviewCategory
     

@@ -33,6 +33,7 @@ class ContentViewModel: ObservableObject {
         
         return nil
     }
+    
 
     /// 清除博客概览数据
     func clearOverview() {
@@ -60,6 +61,72 @@ class ContentViewModel: ObservableObject {
             } catch {
                 // 登录过期
                 onExpired()
+            }
+        }
+    }
+    
+    /// 修改现存的概览分类
+    /// - Parameters:
+    ///   - category: 分类实体
+    func updateExistOverviewCategory(_ category: Category) {
+        if var ov = blogOverview {
+            var categories = ov.categories
+            
+            for i in 0..<categories.endIndex {
+                if categories[i].categoryId == category.categoryId {
+                    categories[i] = category
+                    break
+                }
+            }
+            ov.categories = categories
+            
+            withAnimation {
+                blogOverview = ov
+            }
+        }
+    }
+    
+    /// 修改现存的概览标签
+    /// - Parameters:
+    ///   - tag: 标签实体
+    func updateExistOverviewTag(_ tag: Tag) {
+        if var ov = blogOverview {
+            var tags = ov.tags
+            
+            for i in 0..<tags.endIndex {
+                if tags[i].tagId == tag.tagId {
+                    tags[i] = tag
+                    break
+                }
+            }
+            ov.tags = tags
+            
+            withAnimation {
+                blogOverview = ov
+            }
+        }
+    }
+    
+    /// 删除现存的概览分类
+    /// - Parameters:
+    ///   - category: 分类实体
+    func deleteExistOverviewCategory(_ category: Category) {
+        if var ov = blogOverview {
+            ov.categories = ov.categories.filter { $0.categoryId != category.categoryId }
+            withAnimation {
+                blogOverview = ov
+            }
+        }
+    }
+    
+    /// 删除现存的概览标签
+    /// - Parameters:
+    ///   - tag: 标签实体
+    func deleteExistOverviewTag(_ tag: Tag) {
+        if var ov = blogOverview {
+            ov.tags = ov.tags.filter { $0.tagId != tag.tagId }
+            withAnimation {
+                blogOverview = ov
             }
         }
     }

@@ -12,7 +12,7 @@ import SwiftUI
 /// 概览页面标签卡片
 struct OverviewTagCard: View {
     
-    var tag: BlogOverviewTag
+    var tag: Tag
     
     var body: some View {
         HStack {

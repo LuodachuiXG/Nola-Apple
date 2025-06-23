@@ -12,7 +12,7 @@ import SwiftUI
 /// 分类卡片
 struct OverviewCategoryCard: View {
     
-    var category: BlogOverviewCategory
+    var category: Category
     
     var body: some View {
         HStack {

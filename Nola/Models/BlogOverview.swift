@@ -12,9 +12,9 @@ struct BlogOverview: Codable {
     /// 项目数量
     let count: BlogOverviewCount
     /// 所有标签
-    let tags: [BlogOverviewTag]
+    var tags: [Tag]
     /// 所有分类
-    let categories: [BlogOverviewCategory]
+    var categories: [Category]
     /// 浏览量最高的文章
     let mostViewedPost: Post?
     /// 最后一次操作日志
@@ -48,18 +48,4 @@ struct BlogOverviewCount: Codable {
     let file: Int
     let link: Int
     let menu: Int
-}
-
-/// 博客概览标签实体类
-struct BlogOverviewTag: Codable {
-    let tagId: Int
-    let displayName: String
-    let postCount: Int
-}
-
-/// 博客概览分类实体类
-struct BlogOverviewCategory: Codable {
-    let categoryId: Int
-    let displayName: String
-    let postCount: Int
 }

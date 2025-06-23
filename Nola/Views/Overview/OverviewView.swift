@@ -7,6 +7,7 @@
 
 import SwiftUI
 import DotLottie
+import WaterfallGrid
 
 /// 概览页面
 struct OverviewView: View {
@@ -16,13 +17,17 @@ struct OverviewView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     
+    // 分类和标签的 ViewModel
+    @ObservedObject private var categoryVM = CategoryViewModel()
+    @ObservedObject private var tagVM = TagViewModel()
+    
     private let gridCols = [
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
     ]
     
     // 文章最多的 6 个分类
-    var categories: [BlogOverviewCategory] {
+    var categories: [Category] {
         guard let cs = contentVM.blogOverview?.categories else {
             return []
         }
@@ -36,7 +41,7 @@ struct OverviewView: View {
     }
     
     // 文章最多的 6 个标签
-    var tags: [BlogOverviewTag] {
+    var tags: [Tag] {
         guard let ts = contentVM.blogOverview?.tags else {
             return []
         }
@@ -81,14 +86,25 @@ struct OverviewView: View {
                         // 文章最多的 6 个分类
                         if !categories.isEmpty {
                             OverviewTitle(title: "文章最多的 \(min(6, categories.count)) 个分类")
-                            LazyVGrid(columns: gridCols, alignment: .leading, spacing: .defaultSpacing) {
-                                ForEach(
-                                    categories,
-                                    id: \.categoryId
-                                ) { category in
-                                    OverviewCategoryCard(category: category)
+                            
+                            WaterfallGrid(categories, id: \.categoryId) { category in
+                                NavigationLink {
+                                    CategoryDetailView(category: category, viewModel: categoryVM) { category, delete in
+                                        // 修改了分类，刷新
+                                        if delete {
+                                            // 删除了分类
+                                            contentVM.deleteExistOverviewCategory(category)
+                                        } else {
+                                            // 更新分类
+                                            contentVM.updateExistOverviewCategory(category)
+                                        }
+                                    }
+                                } label: {
+                                    CategoryCard(category: category)
                                 }
                             }
+                            .gridStyle(columns: 2, spacing: .defaultSpacing)
+                            .scrollOptions(direction: .vertical)
                         }
                         
                         // 文章最多的 6 个标签
@@ -99,7 +115,20 @@ struct OverviewView: View {
                                     tags,
                                     id: \.tagId
                                 ) { tag in
-                                    OverviewTagCard(tag: tag)
+                                    NavigationLink {
+                                        TagDetailView(tag: tag, viewModel: tagVM) { tag, delete in
+                                            // 修改了标签，刷新
+                                            if delete {
+                                                // 删除了标签
+                                                contentVM.deleteExistOverviewTag(tag)
+                                            } else {
+                                                // 更新标签
+                                                contentVM.updateExistOverviewTag(tag)
+                                            }
+                                        }
+                                    } label: {
+                                        TagCard(tag: tag)
+                                    }
                                 }
                             }
                         }
@@ -137,13 +166,18 @@ struct OverviewView: View {
             }
             .messageAlert(isPresented: $showAlert, message: LocalizedStringKey(alertMessage))
             .refreshable {
-                if let err = await contentVM.refreshOverview() {
-                    alertMessage = err
-                    showAlert = true
-                }
+                await refreshOverview()
             }
             .navigationTitle(contentVM.blogOverview == nil ? "" : "概览")
             .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+    
+    /// 刷新概览数据
+    private func refreshOverview() async {
+        if let err = await contentVM.refreshOverview() {
+            alertMessage = err
+            showAlert = true
         }
     }
 }

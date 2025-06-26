@@ -17,7 +17,6 @@ struct CategoryCard: View {
     
     init(category: Category) {
         self.category = category
-        print(category)
     }
     
     var body: some View {
@@ -46,5 +45,6 @@ struct CategoryCard: View {
         .frame(maxWidth: .infinity)
         .tint(.primary)
         .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
+        .shadow(radius: .defaultShadowRadius)
     }
 }

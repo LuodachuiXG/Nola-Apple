@@ -687,6 +687,7 @@ private struct ExcerptView: View {
                     ZStack {
                         TextEditor(text: $post.excerpt)
                             .frame(minHeight: 240)
+                            .submitLabel(.done)
                             .disabled(post.autoGenerateExcerpt)
                     }
                     .listRowInsets(EdgeInsets())

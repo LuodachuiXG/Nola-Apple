@@ -29,7 +29,7 @@ struct ContentView: View {
             Tab("模块", systemImage: "xmark.triangle.circle.square") {
                 ModuleView(contentVM: vm)
             }
-
+            
             Tab("用户", systemImage: "person") {
                 UserView()
             }

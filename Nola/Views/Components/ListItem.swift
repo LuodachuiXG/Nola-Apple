@@ -15,14 +15,20 @@ struct ListItem<Content: View>: View {
     
     var label: String
     var content: Content
+    var required: Bool
     
-    init(label: String, @ViewBuilder content: () -> Content) {
+    init(label: String, required: Bool = false, @ViewBuilder content: () -> Content) {
         self.label = label
+        self.required = required
         self.content = content()
     }
     
     var body: some View {
         HStack {
+            if required {
+                Text("*")
+                    .foregroundStyle(.red)
+            }
             Text(label)
             Spacer()
             content

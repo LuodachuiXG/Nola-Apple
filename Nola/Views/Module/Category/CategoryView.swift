@@ -15,8 +15,6 @@ struct CategoryView: View {
     
     @ObservedObject private var vm: CategoryViewModel = CategoryViewModel()
     
-    @State private var isLoading = false
-    
     @State private var alertMessage = ""
     @State private var showAlert = false
     

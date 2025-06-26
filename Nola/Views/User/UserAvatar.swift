@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct UserAvatar: View {
     
@@ -26,16 +27,10 @@ struct UserAvatar: View {
     var body: some View {
         ZStack(alignment: .center) {
             if avatar != nil, !avatar!.isEmpty, let url = URL(string: avatar!) {
-                AsyncImage(url: url) { phase in
-                    if let image = phase.image {
-                        image.resizable()
-                    } else if phase.error != nil {
-                        // 错误显示头像
-                        DefaultAvatar(displayName:displayName, isLight: isLight)
-                    } else {
-                        ProgressView()
-                    }
+                AnimatedImage(url: url) {
+                    ProgressView()
                 }
+                .resizable()
                 .frame(width: width, height: width)
             } else {
                 // 默认头像

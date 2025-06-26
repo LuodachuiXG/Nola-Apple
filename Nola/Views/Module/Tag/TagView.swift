@@ -14,8 +14,6 @@ struct TagView: View {
     
     @ObservedObject private var vm: TagViewModel = TagViewModel()
     
-    @State private var isLoading = false
-    
     @State private var alertMessage = ""
     @State private var showAlert = false
     

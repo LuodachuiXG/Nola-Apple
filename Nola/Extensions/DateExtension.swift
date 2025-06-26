@@ -8,8 +8,15 @@
 import Foundation
 
 
+extension Date {
+    /// 获取当前时间戳毫秒
+    var timestampMillis: Int64 {
+        Int64(self.timeIntervalSince1970) * 1000
+    }
+}
+
+
 extension Int64 {
-    
     /// 将时间戳毫秒转为日期字符串
     func formatMillisToDateStr() -> String {
         let formatter = DateFormatter()

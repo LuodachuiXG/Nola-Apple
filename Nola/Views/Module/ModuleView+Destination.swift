@@ -34,7 +34,7 @@ extension ModuleView {
             ModuleNavData(
                 title: "评论",
                 icon: SFSymbol.comment.rawValue,
-                destination: DetailView(title: "评论"),
+                destination: CommentView(),
                 count: contentVM.blogOverview?.count.comment
             ),
             ModuleNavData(

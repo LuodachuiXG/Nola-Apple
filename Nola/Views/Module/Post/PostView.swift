@@ -43,7 +43,8 @@ struct PostView: View {
     @State private var showKeywordFilterAlert = false
     // 当前是否在筛选状态
     private var isFilter: Bool {
-        statusFilter != nil || visibleFilter != nil || sortFilter != nil || keywordFilter != nil
+        postIdFilter != nil || statusFilter != nil || visibleFilter != nil ||
+        sortFilter != nil || keywordFilter != nil
     }
     // MARK: - 文章筛选
     
@@ -71,6 +72,7 @@ struct PostView: View {
                     if isFilter {
                         // 当前文章在筛选状态，显示筛选指示器
                         PostFilterIndicator(
+                            id: $postIdFilter.animation(),
                             status: $statusFilter.animation(),
                             visible: $visibleFilter.animation(),
                             sort: $sortFilter.animation(),
@@ -274,9 +276,6 @@ struct PostView: View {
             if let err = ret.error {
                 errorMessage = err
                 showErrorAlert = true
-            } else if let post = ret.post {
-                // 获取到筛选的文章后跳转到文章页面
-                path.append(post)
             }
         } else {
             // 文章 ID 为空，正常刷新所有文章
@@ -343,6 +342,8 @@ struct PostView: View {
 
 /// 文章过滤指示器
 private struct PostFilterIndicator: View {
+    // 文章 ID
+    @Binding var id: Int?
     // 文章状态
     @Binding var status: PostStatus?
     // 文章可见性
@@ -357,6 +358,17 @@ private struct PostFilterIndicator: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: .defaultSpacing) {
+            if let id = id {
+                IndicatorContainer(
+                    title: "文章 ID",
+                    content: String(id),
+                    color: Color(UIColor.systemBlue)
+                ) {
+                    self.id = nil
+                    onClear()
+                }
+            }
+            
             if let status = status {
                 IndicatorContainer(title: "文章状态", content: status.desc, color: status.color) {
                     self.status = nil

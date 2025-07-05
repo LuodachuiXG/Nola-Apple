@@ -14,6 +14,8 @@ struct CommentView: View {
     
     @Binding var path: NavigationPath
     
+    @ObservedObject private var postVM = PostViewModel()
+    
     @ObservedObject private var vm: CommentViewModel = CommentViewModel()
     
     @State private var alertMessage = ""
@@ -31,7 +33,12 @@ struct CommentView: View {
             ScrollView(showsIndicators: true) {
                 LazyVStack(spacing: .defaultSpacing) {
                     ForEach(vm.comments, id: \.commentId) { comment in
-                        CommentCard(comment: comment)
+                        CommentCard(comment: comment) { postId in
+                            // 评论上的文章名被点击事件
+                            Task {
+                                await navigateToPostDetail(postId: postId)
+                            }
+                        }
                     }
                 }
             }
@@ -42,8 +49,8 @@ struct CommentView: View {
         .toolbar {
             
         }
-        .navigationDestination(for: Int.self, destination: { postId in
-            PostView(path: $path, postIdFilter: postId)
+        .navigationDestination(for: Post.self, destination: { post in
+            PostDetailView(post: post, viewModel: postVM) { _, _ in }
         })
         .navigationTitle("评论")
         .navigationBarTitleDisplayMode(.inline)
@@ -64,6 +71,23 @@ struct CommentView: View {
         }
         
         firstRefresh = true
+    }
+    
+    /// 跳转文章详情页面
+    /// - Parameters:
+    ///   - postId: 文章 ID
+    private func navigateToPostDetail(
+        postId: Int
+    ) async {
+        // 先获取文章
+        let ret = await postVM.getPostById(id: postId)
+        if let err = ret.error {
+            alertMessage = err
+            showAlert = true
+        } else if let post = ret.post {
+            // 跳转详情页
+            path.append(post)
+        }
     }
     
     /// 更新现有的分类

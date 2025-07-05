@@ -128,7 +128,11 @@ struct PostDetailView: View {
     ///   - post: 文章实体（非 nil 为编辑现有文章，nil 为添加文章）
     ///   - viewModel: PostViewModel 实体
     ///   - onSaved: 保存回调
-    init(post: Post?, viewModel: PostViewModel, onSaved: @escaping (_ post: Post, _ delete: Bool) -> Void) {
+    init(
+        post: Post?,
+        viewModel: PostViewModel,
+        onSaved: @escaping (_ post: Post, _ delete: Bool) -> Void
+    ) {
         var p = post
         if p == nil {
             // 当前是新增文章

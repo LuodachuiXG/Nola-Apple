@@ -101,13 +101,23 @@ final class PostViewModel: ObservableObject {
     /// 根据文章 ID 获取单个文章
     /// - Parameters:
     ///   - id: 文章 ID
+    ///   - saveToViewModel: 是否将当前文章保存到 ViewModel 变量中，使文章页只展示当前一个文章（用于筛选单文章使用）
     /// - Returns: (文章, 错误信息）
     func getPostById(
         id: Int,
+        saveToViewModel: Bool = false
     ) async -> (post: Post?, error: String?) {
         do {
             let ret = try await PostService.getPostById(id: id)
             if let post = ret.data {
+                
+                if saveToViewModel {
+                    // 将当前文章保存到 ViewModel 变量
+                    posts = [post]
+                    page = 1
+                    pager = Pager(page: 1, size: 20, data: [post], totalData: 1, totalPages: 1)
+                }
+                
                 return (post, nil)
             }
         } catch let err as ApiError {

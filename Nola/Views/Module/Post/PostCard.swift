@@ -88,7 +88,7 @@ struct PostCard: View {
                     Text(post.createTime.formatMillisToDateStr())
                         
                 }
-                .font(.caption)
+                .font(.footnote)
                 .foregroundStyle(.secondary)
             }
             .padding(.defaultSpacing)

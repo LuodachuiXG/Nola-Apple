@@ -443,6 +443,7 @@ struct PostDetailView: View {
             }
         }
         .navigationTitle(originalTitle)
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     /// 保存事件

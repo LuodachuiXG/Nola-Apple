@@ -12,6 +12,8 @@ import SwiftUI
 /// 评论 View
 struct CommentView: View {
     
+    @Binding var path: NavigationPath
+    
     @ObservedObject private var vm: CommentViewModel = CommentViewModel()
     
     @State private var alertMessage = ""
@@ -40,6 +42,9 @@ struct CommentView: View {
         .toolbar {
             
         }
+        .navigationDestination(for: Int.self, destination: { postId in
+            PostView(path: $path, postIdFilter: postId)
+        })
         .navigationTitle("评论")
         .navigationBarTitleDisplayMode(.inline)
         .messageAlert(isPresented: $showAlert, message: alertMessage)
@@ -100,6 +105,6 @@ struct CommentView: View {
 
 #Preview {
     NavigationStack {
-        CommentView()
+        CommentView(path: .constant(NavigationPath()))
     }
 }

@@ -11,7 +11,12 @@ import SwiftUI
 /// 文章 View
 struct PostView: View {
     
-    @State private var title = "Hello"
+    @State private var title = "文章"
+    
+    @Binding var path: NavigationPath
+    // 文章 ID 筛选（ID 筛选无法直接展示给用户，这里仅用于页面跳转，代码内部使用），
+    // 如果不为 nil，需要在获取到文章后直接进入文章详情页面，然后将此值赋 nil。
+    @State var postIdFilter: Int? = nil
     
     @StateObject private var vm = PostViewModel()
     
@@ -19,9 +24,9 @@ struct PostView: View {
     @State private var errorMessage = ""
     
     // 标记是否已经刷新过了，防止从子页面回来重复刷新
-    @State var firstRefresh = false
+    @State private var firstRefresh = false
     
-    @State var isLoading = false
+    @State private var isLoading = false
     
     // MARK: - 文章筛选
     // 文章状态筛选
@@ -54,7 +59,7 @@ struct PostView: View {
             "加载中"
         }
     }
-    
+
     var body: some View {
         ZStack {
             if !firstRefresh {
@@ -76,10 +81,7 @@ struct PostView: View {
                         }
                     }
                     ForEach(vm.posts, id: \.postId) { post in
-                        NavigationLink {
-                            // 文章详情页面
-                            postDetailView(post: post)
-                        } label: {
+                        NavigationLink(value: post) {
                             PostCard(post: post)
                                 .tint(.primary)
                         }
@@ -226,6 +228,10 @@ struct PostView: View {
                 keywordFilterEnter = ""
             }
         }
+        .navigationDestination(for: Post.self, destination: { post in
+            // 文章详情页面
+            postDetailView(post: post)
+        })
         .navigationTitle("文章")
         .toolbarTitleDisplayMode(.inline)
         .messageAlert(isPresented: $showErrorAlert, message: LocalizedStringKey(errorMessage))
@@ -261,15 +267,30 @@ struct PostView: View {
     /// 刷新文章
     private func refreshPost() async {
         isLoading = true
-        if let err = await vm.getPosts(
-            status: statusFilter,
-            visible: visibleFilter,
-            key: keywordFilter,
-            sort: sortFilter
-        ) {
-            errorMessage = err
-            showErrorAlert = true
+        
+        if let postId = postIdFilter {
+            // 文章 ID 不为空，从别的地方跳转某个单独文章，只获取单个文章
+            let ret = await vm.getPostById(id: postId, saveToViewModel: true)
+            if let err = ret.error {
+                errorMessage = err
+                showErrorAlert = true
+            } else if let post = ret.post {
+                // 获取到筛选的文章后跳转到文章页面
+                path.append(post)
+            }
+        } else {
+            // 文章 ID 为空，正常刷新所有文章
+            if let err = await vm.getPosts(
+                status: statusFilter,
+                visible: visibleFilter,
+                key: keywordFilter,
+                sort: sortFilter
+            ) {
+                errorMessage = err
+                showErrorAlert = true
+            }
         }
+        
         firstRefresh = true
         isLoading = false
     }
@@ -400,6 +421,6 @@ private struct PostFilterIndicator: View {
 
 #Preview {
     NavigationStack {
-        PostView()
+        PostView(path: .constant(NavigationPath()))
     }
 }

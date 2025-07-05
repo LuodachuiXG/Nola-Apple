@@ -51,5 +51,7 @@ struct ModuleButton: View {
 }
 
 #Preview {
-    ModuleButton(button: ModuleNavData(title: "文章", icon: "book", destination: Text("文章"), count: 10))
+    ModuleButton(
+        button: ModuleNavData(title: "文章", icon: "book", destination: .post(postId: nil), count: 10)
+    )
 }

@@ -22,9 +22,17 @@ struct CommentCard: View {
     var body: some View {
         Card {
             VStack(alignment: .leading, spacing: .defaultSpacing) {
-                // 名称
-                Text(comment.displayName)
-                    .font(.headline)
+                // 名称和邮箱
+                HStack(alignment: .top) {
+                    Text(comment.displayName)
+                        .font(.headline)
+                    Spacer()
+                    Text(comment.email)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                  
+                }
+                .lineLimit(1)
                 
                 // 内容
                 Text(comment.content)
@@ -32,9 +40,22 @@ struct CommentCard: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(3)
                 
+                // 文章标题
+                if let title = comment.postTitle {
+                    NavigationLink(value: comment.postId) {
+                        HStack {
+                            Image(symbol: .post)
+                            Text(title)
+                        }
+                        .font(.footnote)
+                        .foregroundStyle(.blue)
+                        .lineLimit(1)
+                    }
+                }
+                
                 // 创建时间
                 Text(comment.createTime.formatMillisToDateStr())
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
                 
             }

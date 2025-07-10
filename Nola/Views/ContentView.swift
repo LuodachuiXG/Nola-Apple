@@ -25,6 +25,7 @@ struct ContentView: View {
             Tab("概览", systemImage: "waveform.path.ecg.rectangle") {
                 OverviewView(contentVM: vm)
             }
+            
 
             Tab("模块", systemImage: "xmark.triangle.circle.square") {
                 ModuleView(contentVM: vm)

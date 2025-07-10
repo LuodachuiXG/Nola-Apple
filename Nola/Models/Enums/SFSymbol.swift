@@ -83,4 +83,16 @@ enum SFSymbol: String {
     
     /// 垃圾桶
     case trash = "trash"
+    
+    /// 地球图标
+    case globe = "globe"
+    
+    /// 编辑
+    case edit = "pencil"
+    
+    /// 返回
+    case returnIcon = "return"
+    
+    /// 回复
+    case reply = "arrowshape.turn.up.left"
 }

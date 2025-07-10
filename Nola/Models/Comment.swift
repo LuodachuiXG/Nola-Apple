@@ -30,7 +30,7 @@ struct Comment: Codable {
     /// 邮箱
     let email: String
     /// 是否通过审核
-    let isPass: Bool
+    var isPass: Bool
     /// 子评论
     let children: [Comment]?
     /// 创建时间戳毫秒

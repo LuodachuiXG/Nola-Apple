@@ -136,14 +136,19 @@ struct CommentCard: View {
                     if let site = comment.site {
                         HStack {
                             Image(symbol: .globe)
-                            Text(site)
+                            
+                            // 如果站点地址为 /，则代表是当前主站
+                            Text(site == "/" ? "博客主站" : site)
                                 .textSelection(.enabled)
                         }
                         .font(.footnote)
-                        .foregroundStyle(Color(.systemBlue))
+                        .foregroundStyle(site == "/" ? .secondary : Color(.systemBlue))
                         .lineLimit(1)
                         .onTapGesture {
-                            onSiteClick(site)
+                            // 如果当前站点地址是主站，则不跳转网页
+                            if site != "/" {
+                                onSiteClick(site)
+                            }
                         }
                     }
                 }
@@ -172,14 +177,13 @@ struct CommentCard: View {
                 
             }
             .padding(.defaultSpacing)
-            .onTapGesture {
-                withAnimation {
-                    showDetail.toggle()
-                }
-            }
-            
         }
         .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
         .tint(.primary)
+        .onTapGesture {
+            withAnimation {
+                showDetail.toggle()
+            }
+        }
     }
 }

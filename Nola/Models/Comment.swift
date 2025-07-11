@@ -8,7 +8,7 @@
 import Foundation
 
 /// 评论实体
-struct Comment: Codable {
+struct Comment: Codable, Hashable {
     /// 评论 ID
     let commentId: Int
     /// 文章 ID
@@ -22,13 +22,13 @@ struct Comment: Codable {
     /// 回复评论名称（可空）
     let replyDisplayName: String?
     /// 评论内容
-    let content: String
+    var content: String
     /// 站点地址（可空）
-    let site: String?
+    var site: String?
     /// 名称
-    let displayName: String
+    var displayName: String
     /// 邮箱
-    let email: String
+    var email: String
     /// 是否通过审核
     var isPass: Bool
     /// 子评论

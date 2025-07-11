@@ -16,9 +16,9 @@ struct CommentView: View {
     
     @Binding var path: NavigationPath
     
-    @ObservedObject private var postVM = PostViewModel()
+    @StateObject private var postVM = PostViewModel()
     
-    @ObservedObject private var vm: CommentViewModel = CommentViewModel()
+    @StateObject private var vm = CommentViewModel()
     
     @State private var alertMessage = ""
     @State private var showAlert = false
@@ -79,17 +79,15 @@ struct CommentView: View {
                         }
                         .contextMenu {
                             // 编辑评论
-                            NavigationLink {
-                                
-                            } label: {
+                            NavigationLink(value: CommentRoute.Detail(comment: comment)) {
                                 Label("编辑评论", systemImage: SFSymbol.edit.rawValue)
                             }
                             
                             // 撤销或通过审核
                             Button(role: comment.isPass ? .destructive : .cancel) {
                                 Task {
-                                    // 稍微延迟 400 毫秒，防止因 contextMenu 回缩动画导致异常
-                                    try await Task.sleep(nanoseconds: 400_000_000)
+                                    // 稍微延迟 450 毫秒，防止因 contextMenu 回缩动画导致异常
+                                    try await Task.sleep(nanoseconds: 450_000_000)
                                     await passComment(
                                         ids: [comment.commentId],
                                         isPass: !comment.isPass
@@ -103,8 +101,6 @@ struct CommentView: View {
                                 )
                             }
                             
-                            Divider()
-                            
                             // 删除评论
                             Button(role: .destructive) {
                                 deleteCommentId = comment.commentId
@@ -115,11 +111,11 @@ struct CommentView: View {
                             
                             Divider()
                             
-                            // 回复评论
-                            Button {
-                                
-                            } label: {
-                                Label("回复评论", systemImage: SFSymbol.reply.rawValue)
+                            // 回复评论（仅通过审核的评论可以回复）
+                            if comment.isPass {
+                                NavigationLink(value: CommentRoute.Reply(comment: comment)) {
+                                    Label("回复评论", systemImage: SFSymbol.reply.rawValue)
+                                }
                             }
                         }
                         .padding(.horizontal, .defaultSpacing)
@@ -156,7 +152,28 @@ struct CommentView: View {
             
         }
         .navigationDestination(for: Post.self, destination: { post in
+            // 文章详情页
             PostDetailView(post: post, viewModel: postVM) { _, _ in }
+        })
+        .navigationDestination(for: CommentRoute.self, destination: { route in
+            switch route {
+            case .Detail(let comment):
+                // 评论详情
+                CommentDetailView(comment: comment, vm: vm) { newComment, delete in
+                    // 评论保存事件
+                    if !delete {
+                        vm.updateExistComment(comment: newComment)
+                    } else {
+                        // 评论删除
+                    }
+                }
+            case .Reply(let comment):
+                // 回复评论
+                CommentReplyView(comment: comment, vm: vm) { newComment in
+                    // 回复成功
+                }
+            }
+            
         })
         .navigationTitle("评论")
         .navigationBarTitleDisplayMode(.inline)
@@ -256,8 +273,112 @@ struct CommentView: View {
     
 }
 
+/// 回复评论 View
+private struct CommentReplyView: View {
+    
+    @Environment(\.dismiss) var dismiss
+
+    // 要回复的评论
+    let comment: Comment
+    
+    @ObservedObject var vm: CommentViewModel
+    
+    // 回复成功后回调（回调新增的评论）
+    private var onReply: (_ comment: Comment) -> Void = { _ in }
+    
+    @State private var replyContent: String = ""
+    
+    @State private var alertMessage = ""
+    @State private var showAlert = false
+    
+    init(
+        comment: Comment,
+        vm: CommentViewModel,
+        onReply: @escaping (_ comment: Comment) -> Void = { _ in }
+    ) {
+        self.comment = comment
+        self.vm = vm
+        self.onReply = onReply
+    }
+    
+    var body: some View {
+        List {
+            Section("回复 \(comment.displayName)") {
+                ZStack {
+                    TextEditor(text: $replyContent)
+                        .frame(minHeight: 240)
+                        .submitLabel(.done)
+                }
+                .listRowInsets(EdgeInsets())
+                .padding(.defaultSpacing)
+            }
+        }
+        .navigationTitle("回复评论")
+        .navigationBarTitleDisplayMode(.inline)
+        .messageAlert(isPresented: $showAlert, message: alertMessage)
+        .toolbar {
+            Button("回复") {
+                Task {
+                    await replyComment()
+                }
+            }
+        }
+    }
+    
+    /// 回复评论
+    private func replyComment() async {
+        // 先获取当前登录用户的个人信息
+        
+        if replyContent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // 回复内容为空，直接返回
+            dismiss()
+            return
+        }
+        
+        guard let user = StoreManager.shared.getUser() else {
+            alertMessage = "请先登录"
+            showAlert = true
+            return
+        }
+        
+        let ret = await vm.addComment(
+            postId: comment.postId,
+            // 如果回复的评论有父评论，证明他已经是子评论，所以父评论和回复的评论相同。否则回复的是顶级评论，直接将父评论设为当前评论
+            parentCommentId: comment.parentCommentId ?? comment.commentId,
+            // 如果回复的评论有父评论，证明他已经是子评论，需要设置 replyCommentId。否则回复的是底层评论，不用设置 replyCommentId。
+            replyCommentId: comment.parentCommentId == nil ? nil : comment.commentId,
+            content: replyContent,
+            site: "/",
+            displayName: user.displayName,
+            email: user.email,
+            isPass: true
+        )
+        
+        if let err = ret.error {
+            // 发生错误
+            alertMessage = err
+            showAlert = true
+        } else if let c = ret.comment {
+            // 回复成功
+            onReply(c)
+            dismiss()
+        }
+    }
+}
+
+/// 评论路由类型
+private enum CommentRoute: Hashable {
+    /// 评论详情
+    case Detail(comment: Comment)
+    /// 回复评论
+    case Reply(comment: Comment)
+}
+
+
+
 #Preview {
-    NavigationStack {
+    @Previewable @State var path = NavigationPath()
+    NavigationStack(path: $path) {
         CommentView(path: .constant(NavigationPath()))
     }
 }

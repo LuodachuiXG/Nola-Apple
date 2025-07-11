@@ -30,30 +30,42 @@ final class CommentViewModel: ObservableObject {
         }
     }
     
-    
-    /// 新增分类
+    /// 添加评论（回复评论）
     /// - Parameters:
     ///   - category: 分类实体
     /// - Returns: (分类实体, 错误信息)
-//    func addCategory(category: Category) async -> (category: Category?, error: String?) {
-//        do {
-//            let ret = try await CategoryService.addCategory(
-//                displayName: category.displayName,
-//                slug: category.slug,
-//                cover: category.cover,
-//                unifiedCover: category.unifiedCover
-//            )
-//            if let category = ret.data {
-//                return (category, nil)
-//            }
-//        } catch let err as ApiError {
-//            return (nil, err.message)
-//        } catch {
-//            return (nil, error.localizedDescription)
-//        }
-//        
-//        return (nil, "未知错误")
-//    }
+    func addComment(
+        postId: Int,
+        parentCommentId: Int?,
+        replyCommentId: Int?,
+        content: String,
+        site: String?,
+        displayName: String,
+        email: String,
+        isPass: Bool
+    ) async -> (comment: Comment?, error: String?) {
+        do {
+            let ret = try await CommentService.addComment(
+                postId: postId,
+                parentCommentId: parentCommentId,
+                replyCommentId: replyCommentId,
+                content: content,
+                site: (site == nil || site!.isEmpty) ? nil : site,
+                displayName: displayName,
+                email: email,
+                isPass: isPass
+            )
+            if let comment = ret.data {
+                return (comment, nil)
+            }
+        } catch let err as ApiError {
+            return (nil, err.message)
+        } catch {
+            return (nil, error.localizedDescription)
+        }
+        
+        return (nil, "未知错误")
+    }
     
     /// 删除评论
     /// - Parameters:
@@ -74,6 +86,40 @@ final class CommentViewModel: ObservableObject {
         return nil
     }
     
+    /// 更新评论
+    /// - Parameters:
+    ///   - commentId: 评论 ID
+    ///   - content: 评论内容
+    ///   - site: 站点地址
+    ///   - displayName: 名称
+    ///   - email: 邮箱
+    ///   - isPass: 是否通过审核
+    func updateComment(
+        commentId: Int,
+        content: String,
+        site: String?,
+        displayName: String,
+        email: String,
+        isPass: Bool
+    ) async -> String? {
+        do {
+            let _ = try await CommentService.updateComment(
+                commentId: commentId,
+                content: content,
+                site: (site == nil || site!.isEmpty) ? nil : site,
+                displayName: displayName,
+                email: email,
+                isPass: isPass
+            )
+        } catch let err as ApiError {
+            return err.message
+        } catch {
+            return error.localizedDescription
+        }
+        
+        return nil
+    }
+    
     /// 更新现有的评论
     /// - Parameters:
     ///   -  comment: 评论实体
@@ -83,6 +129,7 @@ final class CommentViewModel: ObservableObject {
                 withAnimation {
                     comments[i] = comment
                 }
+                return
             }
         }
         

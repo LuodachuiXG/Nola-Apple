@@ -14,7 +14,7 @@ struct CommentService {
     /// - Parameters:
     ///   - postId: 文章 ID
     ///   - parentCommentId: 父评论 ID（可选）
-    ///   - replayCommentId: 回复评论 ID（可选）
+    ///   - replyCommentId: 回复评论 ID（可选）
     ///   - content: 评论内容
     ///   - site: 站点地址（可选）
     ///   - displayName: 名称
@@ -23,7 +23,7 @@ struct CommentService {
     static func addComment(
         postId: Int,
         parentCommentId: Int?,
-        replayCommentId: Int?,
+        replyCommentId: Int?,
         content: String,
         site: String?,
         displayName: String,
@@ -36,7 +36,7 @@ struct CommentService {
             parameters: [
                 "postId": postId,
                 "parentCommentId": parentCommentId,
-                "replayCommentId": replayCommentId,
+                "replyCommentId": replyCommentId,
                 "content": content,
                 "site": site,
                 "displayName": displayName,

@@ -19,11 +19,21 @@ struct CommentCard: View {
     /// 文章标题点击事件
     var onPostClick: (_ postId: Int) -> Void
     
-    /// 通过审核按钮点击事件
-    var onPassClick: () -> Void
+    /// 通过审核按钮点击事件（操作的评论, 操作的子评论, 是否通过审核），如果 child 不为 nil，则认为是对 child 的操作，
+    /// 对 child 的操作时也传递 comment 是否为了快速定位父评论，减少时间复杂度。
+    var onPassClick: (_ comment: Comment, _ child: Comment?, _ isPass: Bool) -> Void
     
     /// 站点地址点击事件
     var onSiteClick: (_ side: String) -> Void
+    
+    /// 删除评论事件（操作的评论, 操作的子评论（如果是对子评论操作）），如果 child 不为 nil，则认为是对 child 的操作。
+    var onDelete: (_ comment: Comment, _ child: Comment?) -> Void
+    
+    /// 编辑评论事件（操作的评论, 操作的子评论（如果是对子评论操作）），如果 child 不为 nil，则认为是对 child 的操作。
+    var onEdit: (_ comment: Comment, _ child: Comment?) -> Void
+    
+    /// 回复评论事件（操作的评论, 操作的子评论（如果是对子评论操作）），如果 child 不为 nil，则认为是对 child 的操作。
+    var onReply: (_ comment: Comment, _ child: Comment?) -> Void
     
     /// 文章内容，动态添加回复人等信息
     private var content: AttributedString {
@@ -47,18 +57,34 @@ struct CommentCard: View {
     /// - Parameters:
     ///   - comment: 评论实体
     ///   - onPostClick: 文章点击事件
-    ///   - onPassClick: 通过审核点击事件
+    ///   - onPassClick: 通过审核点击事件（操作的评论, 是否是子评论的操作, 是否通过审核）
+    ///                  如果 child 不为 nil，则认为是对 child的操作，
+    ///                  对 child 的操作时也传递 comment 是否为了快速定位父评论，减少时间复杂度。
     ///   - onSiteClick: 站点地址点击事件
+    ///   - onDelete: 删除评论事件（操作的评论, 是否是子评论的操作, 是否通过审核），
+    ///               如果 child 不为 nil，则认为是对child的操作。
+    ///   - onEdit: 编辑评论事件（操作的评论, 是否是子评论的操作, 是否通过审核），
+    ///             如果 child 不为 nil，则认为是对child的操作。
     init(
         comment: Comment,
         onPostClick: @escaping (_ postId: Int) -> Void = { _ in },
-        onPassClick: @escaping () -> Void = {},
-        onSiteClick: @escaping (_ site: String) -> Void = { _ in }
+        onPassClick: @escaping (
+            _ comment: Comment,
+            _ child: Comment?,
+            _ isPass: Bool
+        ) -> Void = { _, _, _  in },
+        onSiteClick: @escaping (_ site: String) -> Void = { _ in },
+        onDelete: @escaping (_ comment: Comment, _ child: Comment?) -> Void = { _, _ in },
+        onEdit: @escaping (_ comment: Comment, _ child: Comment?) -> Void = { _, _ in },
+        onReply: @escaping (_ comment: Comment, _ child: Comment?) -> Void = { _, _ in }
     ) {
         self.comment = comment
         self.onPostClick = onPostClick
         self.onPassClick = onPassClick
         self.onSiteClick = onSiteClick
+        self.onDelete = onDelete
+        self.onEdit = onEdit
+        self.onReply = onReply
     }
     
     var body: some View {
@@ -154,13 +180,24 @@ struct CommentCard: View {
                 }
                 
                 // 创建时间
-                Text(comment.createTime.formatMillisToDateStr())
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                HStack(alignment: .bottom) {
+                    Text(comment.createTime.formatMillisToDateStr())
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    
+                    Spacer()
+                    
+                    if let children = comment.children, !children.isEmpty {
+                        Text("\(children.count) 个回复")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 
+                // 通过审核按钮
                 if !comment.isPass {
                     Button {
-                        onPassClick()
+                        onPassClick(comment, nil, true)
                     } label: {
                         HStack {
                             Image(symbol: .check)
@@ -175,6 +212,38 @@ struct CommentCard: View {
 
                 }
                 
+                // 子评论
+                if showDetail {
+                    if let children = comment.children {
+                        LazyVStack(spacing: .defaultSpacing) {
+                            ForEach(children, id: \.commentId) { cmt in
+                                CommentCard(
+                                    comment: cmt
+                                ) { postId in
+                                    // 子评论文章点击事件
+                                    self.onPostClick(postId)
+                                } onPassClick: { _, _, isPass in
+                                    // 子评论通过审核点击事件
+                                    self.onPassClick(comment, cmt, isPass)
+                                } onSiteClick: { site in
+                                    // 子评论站点点击的事件
+                                    self.onSiteClick(site)
+                                } onDelete: { _, _ in
+                                    // 子评论删除点击事件
+                                    self.onDelete(comment, cmt)
+                                } onEdit: { _, _ in
+                                    // 子评论编辑事件
+                                    self.onEdit(comment, cmt)
+                                } onReply: { _, _ in
+                                    // 子评论回复事件
+                                    self.onReply(comment, cmt)
+                                }
+                                .shadow(radius: .defaultShadowRadius)
+                            }
+                        }
+                    }
+                }
+                
             }
             .padding(.defaultSpacing)
         }
@@ -183,6 +252,43 @@ struct CommentCard: View {
         .onTapGesture {
             withAnimation {
                 showDetail.toggle()
+            }
+        }
+        .contextMenu {
+            // 编辑评论
+            Button {
+                onEdit(comment, nil)
+            } label: {
+                Label("编辑评论", systemImage: SFSymbol.edit.rawValue)
+            }
+            
+            // 撤销或通过审核
+            Button(role: comment.isPass ? .destructive : .cancel) {
+                onPassClick(comment, nil, !comment.isPass)
+            } label: {
+                Label(
+                    comment.isPass ? "撤销审核" : "通过审核",
+                    systemImage: comment.isPass ? SFSymbol.returnIcon.rawValue :
+                        SFSymbol.check.rawValue
+                )
+            }
+            
+            // 删除评论
+            Button(role: .destructive) {
+                onDelete(comment, nil)
+            } label: {
+                Label("删除评论", systemImage: SFSymbol.trash.rawValue)
+            }
+            
+            Divider()
+            
+            // 回复评论（仅通过审核的评论可以回复）
+            if comment.isPass {
+                Button {
+                    onReply(comment, nil)
+                } label: {
+                    Label("回复评论", systemImage: SFSymbol.reply.rawValue)
+                }
             }
         }
     }

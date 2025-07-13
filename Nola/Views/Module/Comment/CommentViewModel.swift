@@ -29,6 +29,7 @@ final class CommentViewModel: ObservableObject {
             false
         }
     }
+
     
     /// 添加评论（回复评论）
     /// - Parameters:
@@ -67,23 +68,40 @@ final class CommentViewModel: ObservableObject {
         return (nil, "未知错误")
     }
     
-    /// 删除评论
+    /// 添加现有评论
     /// - Parameters:
-    ///   - ids: 评论 ID 数组
-    func deleteComment(ids: [Int]) async -> String? {
-        do {
-            let ret = try await CommentService.deleteComments(ids: ids)
-            if ret.data == true {
-                // 删除更新，更新评论列表
-                deleteExistComment(ids: ids)
+    ///   - comment: 要添加的评论
+    ///   - parent: 父评论（如果有），如果此项不为 nil，新评论将插入到当前父评论的子数组中。
+    ///   - at: 添加的位置，默认 0
+    func addExistComment(
+        comment: Comment,
+        parent: Comment? = nil,
+        at index: Int = 0
+    ) {
+        
+        if let parent = parent {
+            // 父评论不为空，将评论插入父的子数组中
+            // 先找到父评论
+            for i in 0..<comments.count {
+                if comments[i].commentId == parent.commentId {
+                    // 找到父评论，将新的评论插入
+                    var p = comments[i]
+                    var children = p.children ?? [Comment]()
+                    children.insert(comment, at: index)
+                    p.children = children
+                    withAnimation {
+                        comments[i] = p
+                    }
+                    return
+                }
             }
-        } catch let err as ApiError {
-            return err.message
-        } catch {
-            return error.localizedDescription
+            return
         }
         
-        return nil
+        // 直接将新评论插入评论数组
+        withAnimation {
+            comments.insert(comment, at: index)
+        }
     }
     
     /// 更新评论
@@ -122,8 +140,46 @@ final class CommentViewModel: ObservableObject {
     
     /// 更新现有的评论
     /// - Parameters:
-    ///   -  comment: 评论实体
-    func updateExistComment(comment: Comment) {
+    ///   - comment: 评论实体
+    ///   - parent: 父评论实体（如果有），此选项是为了在更新本地评论时减少时间复杂度（在所有评论中嵌套循环找子，变为先找父再找子），
+    ///             如果此项不为 nil，则认为上面的 comment 是某个父评论的子评论。
+    func updateExistComment(comment: Comment, parent: Comment? = nil) {
+        
+        if let parent = parent {
+            // 当前是更新某个父评论下的子评论，先找到父
+            for i in 0..<comments.count {
+                if comments[i].commentId == parent.commentId {
+                    // 找到了父评论
+                    var p = comments[i]
+                    var children = p.children ?? [Comment]()
+                    // 找到子评论并更新
+                    for j in 0..<children.count {
+                        if children[j].commentId == comment.commentId {
+                            children[j] = comment
+                            p.children = children
+                            withAnimation {
+                                comments[i] = p
+                            }
+                            return
+                        }
+                    }
+                    
+                    // for 循环结束了走到这里，没有找到子评论，证明当前是新增
+                    children.append(comment)
+                    p.children = children
+                    withAnimation {
+                        comments[i] = p
+                    }
+                    return
+                }
+            }
+            return
+        }
+        
+        
+        
+        
+        // 当前是对顶层评论的操作，直接找到并替换
         for i in 0..<comments.count {
             if comments[i].commentId == comment.commentId {
                 withAnimation {
@@ -139,22 +195,20 @@ final class CommentViewModel: ObservableObject {
         }
     }
     
-    /// 删除现有的分类
-    /// - Parameters:
-    ///   - ids: 评论 ID 数组
-    func deleteExistComment(ids: [Int]) {
-        let set = Set(ids)
-        withAnimation {
-            comments = comments.filter { !set.contains($0.commentId) }
-        }
-    }
-    
     
     /// 获取所有评论
     /// - Parameters:
+    ///   - isPass: 是否通过审核（默认 nil 获取所有）
+    ///   - key: 关键词（内容、邮箱、名称）
+    ///   - sort: 评论排序（默认 nil 默认排序）
+    ///   - tree: 是否树形结构（默认 false 平铺）
     ///   - loadMore: 是否加载更多（默认 false 即加载第一页，true 增加页码追加下一页到尾部）
     /// - Returns: 返回失败信息（如果失败），成功返回 nil
     func getComments(
+        isPass: Bool? = nil,
+        key: String? = nil,
+        sort: CommentSort? = nil,
+        tree: Bool = false,
         loadMore: Bool = false
     ) async -> String? {
         do {
@@ -168,8 +222,10 @@ final class CommentViewModel: ObservableObject {
                         postId: nil,
                         commentId: nil,
                         parentCommentId: nil,
-                        isPass: nil,
-                        key: nil
+                        isPass: isPass,
+                        key: key,
+                        sort: sort,
+                        tree: tree
                     ).data {
                         self.pager = c
                         if let cs = c.data {
@@ -188,8 +244,10 @@ final class CommentViewModel: ObservableObject {
                     postId: nil,
                     commentId: nil,
                     parentCommentId: nil,
-                    isPass: nil,
-                    key: nil
+                    isPass: isPass,
+                    key: key,
+                    sort: sort,
+                    tree: tree
                 ).data {
                     self.pager = pager
                     if let comments = pager.data {
@@ -225,33 +283,105 @@ final class CommentViewModel: ObservableObject {
 //        
 //        return (nil, "未知错误")
 //    }
-//    
+
+    /// 删除评论
+    /// - Parameters:
+    ///   - id: 要删除的评论
+    ///   - parentId: 父评论（如果有），此选项是为了在云端修改完成后，本地修改状态时减少每次查找的时间复杂度，
+    ///               如果此项不为 nil，则认为上面的 id 指的是某个评论的子评论。
+    func deleteComment(id: Int, parentId: Int? = nil) async -> String? {
+        do {
+            let ret = try await CommentService.deleteComments(ids: [id])
+            if ret.data == true {
+                // 删除完成，更新评论列表
+                deleteExistComment(id: id, parentId: parentId)
+            }
+        } catch let err as ApiError {
+            return err.message
+        } catch {
+            return error.localizedDescription
+        }
+        
+        return nil
+    }
+    
+    /// 删除现有的评论
+    /// - Parameters:
+    ///   - id: 要删除的评论
+    ///   - parentId: 父评论（如果有）
+    func deleteExistComment(id: Int, parentId: Int? = nil) {
+        if let parentId = parentId {
+            // 当前是删除某个父评论下的子评论，先找到父评论
+            for i in 0..<comments.count {
+                if comments[i].commentId == parentId {
+                    // 已经找到父评论，过滤掉被删除的子评论
+                    withAnimation {
+                        comments[i].children = comments[i].children?.filter { $0.commentId != id}
+                    }
+                    return
+                }
+            }
+        } else {
+            // 当前是删除顶层评论，不是子评论，直接过滤
+            withAnimation {
+                comments = comments.filter { $0.commentId != id }
+            }
+        }
+        
+    }
     
     /// 评论通过审核
     /// - Parameters:
-    ///   - ids: 评论 ID 数组
+    ///   - id: 要修改的评论
+    ///   - parentId: 父评论（如果有），此选项是为了在云端修改完成后，本地修改状态时减少每次查找的时间复杂度，
+    ///               如果此项不为 nil，则认为上面的 id 指的是某个评论的子评论。
     ///   - isPass: 是否通过审核，默认 true 通过审核
     /// - Returns: 返回失败信息（如果失败），成功返回 nil
     func passComment(
-        ids: [Int],
+        id: Int,
+        parentId: Int? = nil,
         isPass: Bool = true
     ) async -> String? {
         do {
-            let ret = try await CommentService.updateCommentPass(ids: ids, isPass: isPass)
+            let ret = try await CommentService.updateCommentPass(ids: [id], isPass: isPass)
             if ret.data == true {
-                
                 // 修改评论状态
-                let set = Set(ids)
+                if let parentId = parentId {
+                    
+                    // 当前修改的是子评论，先找到父评论
+                    for i in 0..<comments.count {
+                        if comments[i].commentId == parentId, var children = comments[i].children {
+                            var comment = comments[i]
+                            // 找到本次修改的子评论
+                            for j in 0..<children.count {
+                                if children[j].commentId == id {
+                                    // 修改子评论状态
+                                    children[j].isPass = isPass
+                                    comment.children = children
+                                    
+                                    withAnimation {
+                                        comments[i] = comment
+                                    }
+                                    return nil
+                                }
+                            }
+                        }
+                    }
+                    return nil
+                }
+                
+                
+                // 当前修改的是顶层父评论，正常处理先找到评论
                 for i in 0..<comments.count {
-                    if (set.contains(comments[i].commentId)) {
+                    if comments[i].commentId == id {
                         var comment = comments[i]
                         comment.isPass = isPass
                         withAnimation {
                             comments[i] = comment
                         }
+                        break
                     }
                 }
-                
                 return nil
             }
         } catch let err as ApiError {

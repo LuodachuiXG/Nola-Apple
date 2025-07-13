@@ -32,7 +32,7 @@ struct Comment: Codable, Hashable {
     /// 是否通过审核
     var isPass: Bool
     /// 子评论
-    let children: [Comment]?
+    var children: [Comment]?
     /// 创建时间戳毫秒
     let createTime: Int64
 }

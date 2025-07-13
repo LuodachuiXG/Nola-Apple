@@ -202,15 +202,16 @@ struct PostView: View {
                 }
                 
             } label: {
-                Label("过滤文章", systemImage: SFSymbol.filter.rawValue)
+                Label("文章选项", systemImage: SFSymbol.filter.rawValue)
             }
 
         }
         // 关键词搜索弹窗
         .alert("关键字搜索", isPresented: $showKeywordFilterAlert) {
             TextField("标题、别名、摘要、内容", text: $keywordFilterEnter)
+                .textInputAutocapitalization(.never)
             Button("搜索") {
-                if !keywordFilterEnter.isEmpty {
+                if !keywordFilterEnter.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     // 关键词不为空，搜索
                     withAnimation {
                         keywordFilter = keywordFilterEnter
@@ -359,7 +360,7 @@ private struct PostFilterIndicator: View {
     var body: some View {
         VStack(alignment: .leading, spacing: .defaultSpacing) {
             if let id = id {
-                IndicatorContainer(
+                FilterIndicatorContainer(
                     title: "文章 ID",
                     content: String(id),
                     color: Color(UIColor.systemBlue)
@@ -370,64 +371,37 @@ private struct PostFilterIndicator: View {
             }
             
             if let status = status {
-                IndicatorContainer(title: "文章状态", content: status.desc, color: status.color) {
+                FilterIndicatorContainer(title: "文章状态", content: status.desc, color: status.color) {
                     self.status = nil
                     onClear()
                 }
             }
             
             if let visible = visible {
-                IndicatorContainer(title: "文章可见性", content: visible.desc, color: visible.color) {
+                FilterIndicatorContainer(title: "文章可见性", content: visible.desc, color: visible.color) {
                     self.visible = nil
                     onClear()
                 }
             }
             
             if let sort = sort {
-                IndicatorContainer(title: "文章排序", content: sort.desc, color: Color(UIColor.systemBlue)) {
+                FilterIndicatorContainer(title: "文章排序", content: sort.desc, color: Color(UIColor.systemBlue)) {
                     self.sort = nil
                     onClear()
                 }
             }
             
             if let keyword = keyword {
-                IndicatorContainer(title: "关键词", content: keyword, color: Color(UIColor.systemBlue)) {
+                FilterIndicatorContainer(
+                    title: "关键词",
+                    content: keyword,
+                    color: Color(UIColor.systemBlue)
+                ) {
                     self.keyword = nil
                     onClear()
                 }
             }
         }
-    }
-    
-    /// 指示器容器
-    /// - Parameters:
-    ///   - title: 标题（如：文章状态）
-    ///   - content: 内容（如：已发布）
-    ///   - color: 内容文本颜色
-    ///   - onClear: 清除按钮点击事件
-    private func IndicatorContainer(
-        title: String,
-        content: String,
-        color: Color,
-        onClear: @escaping () -> Void
-    ) -> some View {
-        HStack {
-            Text(title)
-                .font(.callout)
-            Text(content)
-                .font(.callout.weight(.semibold))
-                .foregroundStyle(color)
-            Spacer()
-            Button {
-                onClear()
-            } label: {
-                Label("清除", systemImage: SFSymbol.x.rawValue)
-            }
-        }
-        .padding(.defaultSpacing)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: .defaultCornerRadius))
-        .shadow(color: .black.opacity(0.2), radius: 10)
     }
 }
 

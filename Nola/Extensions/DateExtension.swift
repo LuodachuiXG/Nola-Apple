@@ -65,4 +65,15 @@ extension Int64 {
             return "刚刚"
         }
     }
+    
+    /// 通过时间戳（毫秒）获取当前中文月份
+    /// - returns: 一月、二月、三月
+    func chineseMonth() -> String {
+        let date = Date(timeIntervalSince1970: TimeInterval(self) / 1000)
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        // 月份全称
+        formatter.dateFormat = "MMMM"
+        return formatter.string(from: date)
+    }
 }

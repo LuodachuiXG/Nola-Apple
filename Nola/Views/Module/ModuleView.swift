@@ -51,6 +51,8 @@ struct ModuleView: View {
                     CategoryView()
                 case .comment:
                     CommentView(path: $path)
+                case .diary:
+                    DiaryView(path: $path)
                 default:
                     DetailView(title: "未完成")
                 }

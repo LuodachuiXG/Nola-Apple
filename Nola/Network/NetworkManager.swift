@@ -57,7 +57,6 @@ class NetworkManager {
         parameters: [String: Any?]? = nil,
         array: [Any?]? = nil
     ) async throws -> ApiResponse<T>  {
-        
         guard let base = baseUrl else {
             throw ApiError(message: "未配置服务器地址")
         }

@@ -47,6 +47,7 @@ struct PostContentView: View {
                         content?.content = newValue
                     }
                 )
+                .textInputAutocapitalization(.never)
                 .padding(5)
                 .frame(maxHeight: .infinity)
             }

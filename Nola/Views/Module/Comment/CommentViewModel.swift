@@ -265,24 +265,6 @@ final class CommentViewModel: ObservableObject {
         
         return nil
     }
-    
-    /// 根据分类 ID 获取分类
-    /// - Parameters:
-    ///   - categoryId: 分类 ID
-//    func getCategoryById(categoryId: Int) async -> (category: Category?, error: String?) {
-//        do {
-//            let ret = try await CategoryService.getCategoryById(categoryId: categoryId)
-//            if let category = ret.data {
-//                return (category, nil)
-//            }
-//        } catch let err as ApiError {
-//            return (nil, err.message)
-//        } catch {
-//            return (nil, error.localizedDescription)
-//        }
-//        
-//        return (nil, "未知错误")
-//    }
 
     /// 删除评论
     /// - Parameters:

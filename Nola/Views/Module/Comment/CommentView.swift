@@ -611,6 +611,6 @@ private enum CommentRoute: Hashable {
 #Preview {
     @Previewable @State var path = NavigationPath()
     NavigationStack(path: $path) {
-        CommentView(path: .constant(NavigationPath()))
+        CommentView(path: $path)
     }
 }

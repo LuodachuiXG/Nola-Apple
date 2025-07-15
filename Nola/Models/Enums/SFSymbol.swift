@@ -17,7 +17,7 @@ enum SFSymbol: String {
     case tag = "tag"
     /// 评论
     case comment = "message"
-    /// 日常
+    /// 日记
     case diary = "leaf"
     /// 附件
     case file = "tray.full"

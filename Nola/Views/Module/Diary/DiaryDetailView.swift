@@ -68,7 +68,7 @@ struct DiaryDetailView: View {
             }
         }
         .loadingAlert(isPresented: $isSaving, message: "正在保存", closableAfter: .seconds(10))
-        .navigationTitle(diary == nil ? "新增日常" : "编辑日常")
+        .navigationTitle(diary == nil ? "新增日记" : "编辑日记")
         .navigationBarTitleDisplayMode(.inline)
     }
     

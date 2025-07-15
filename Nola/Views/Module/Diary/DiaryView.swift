@@ -18,9 +18,9 @@ struct DiaryView: View {
     @State private var alertMessage = ""
     @State private var showAlert = false
     
-    // 要删除的日常 ID
+    // 要删除的日记 ID
     @State private var deleteDiaryId: Int? = nil
-    // 是否显示删除日常弹窗
+    // 是否显示删除日记弹窗
     @State private var showDeleteDiaryAlert = false
     
     @State private var isLoading = false
@@ -32,7 +32,7 @@ struct DiaryView: View {
     private var pullUpRefreshText: String {
         if let pager = vm.pager {
             if !vm.hasNextPage {
-                "没有更多日常了"
+                "没有更多日记了"
             } else {
                 "加载中 (\(pager.page) / \(pager.totalPages) 页)"
             }
@@ -59,11 +59,11 @@ struct DiaryView: View {
             ScrollView(showsIndicators: true) {
                 LazyVStack(alignment:.leading, spacing: .defaultSpacing) {
                     if isFilter {
-                        // 当前日常在筛选状态，显示筛选指示器
+                        // 当前日记在筛选状态，显示筛选指示器
                         DiaryFilterIndicator(
                             sort: $sortFilter.animation()
                         ) {
-                            // 刷新日常
+                            // 刷新日记
                             Task {
                                 await refreshDiary()
                             }
@@ -80,7 +80,7 @@ struct DiaryView: View {
                                         deleteDiaryId = diary.diaryId
                                         showDeleteDiaryAlert = true
                                     } label: {
-                                        Label("删除日常", systemImage: SFSymbol.trash.rawValue)
+                                        Label("删除日记", systemImage: SFSymbol.trash.rawValue)
                                     }
                                 }
                         }
@@ -122,14 +122,14 @@ struct DiaryView: View {
                     vm.addExistDiary(diary: newDiary)
                 }
             } label: {
-                Label("添加日常", systemImage: SFSymbol.plus.rawValue)
+                Label("添加日记", systemImage: SFSymbol.plus.rawValue)
             }
             
             
             Menu {
-                // 日常排序
+                // 日记排序
                 Menu {
-                    Picker("日常排序",  selection: $sortFilter.animation()) {
+                    Picker("日记排序",  selection: $sortFilter.animation()) {
                         ForEach(DiarySort.allCases, id: \.self) { sort in
                             Text(sort.desc).tag(sort)
                         }
@@ -144,7 +144,7 @@ struct DiaryView: View {
                         }
                     })
                 } label: {
-                    Text("日常排序")
+                    Text("日记排序")
                 }
                 
                 if isFilter {
@@ -156,17 +156,17 @@ struct DiaryView: View {
                     }
                 }
             } label: {
-                Label("日常选项", systemImage: SFSymbol.filter.rawValue)
+                Label("日记选项", systemImage: SFSymbol.filter.rawValue)
             }
         }
         .messageAlert(isPresented: $showAlert, message: alertMessage)
-        .confirmAlert(isPresented: $showDeleteDiaryAlert, message: "确定要删除日常吗") {
-            // 删除日常
+        .confirmAlert(isPresented: $showDeleteDiaryAlert, message: "确定要删除日记吗") {
+            // 删除日记
             if let id = deleteDiaryId {
                 deleteDiary(id: id)
             }
         }
-        .navigationTitle("日常")
+        .navigationTitle("日记")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: Diary.self, destination: { diary in
             // 日记编辑页面
@@ -223,7 +223,7 @@ struct DiaryView: View {
         }
     }
     
-    /// 删除日常
+    /// 删除日记
     private func deleteDiary(id: Int) {
         Task {
             if let err = await vm.deleteDiary(id: id) {
@@ -246,7 +246,7 @@ private struct DiaryFilterIndicator: View {
         VStack(alignment: .leading, spacing: .defaultSpacing) {
             if let sort = sort {
                 FilterIndicatorContainer(
-                    title: "日常排序",
+                    title: "日记排序",
                     content: sort.desc,
                     color: Color(UIColor.systemBlue)
                 ) {

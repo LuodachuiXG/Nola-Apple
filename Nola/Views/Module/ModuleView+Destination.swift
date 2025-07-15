@@ -38,7 +38,7 @@ extension ModuleView {
                 count: contentVM.blogOverview?.count.comment
             ),
             ModuleNavData(
-                title: "日常",
+                title: "日记",
                 icon: SFSymbol.diary.rawValue,
                 destination: .diary,
                 count: contentVM.blogOverview?.count.diary
